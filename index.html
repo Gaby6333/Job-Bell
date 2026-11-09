@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Suivis Clients</title>
+  <meta name="theme-color" content="#00549a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>Suivis Clients</h1>
+    <button id="btn-deconnexion" class="lien" hidden>Déconnexion</button>
+  </header>
+
+  <section id="ecran-connexion" hidden>
+    <form id="form-connexion" class="carte">
+      <h2 id="titre-connexion">Connexion</h2>
+      <label id="champ-nom" hidden>Ton nom
+        <input name="nom" autocomplete="name">
+      </label>
+      <label>Courriel
+        <input name="courriel" type="email" required autocomplete="email">
+      </label>
+      <label>Mot de passe
+        <input name="motdepasse" type="password" required minlength="6" autocomplete="current-password">
+      </label>
+      <button type="submit" class="principal" id="btn-connexion">Se connecter</button>
+      <button type="button" class="lien" id="btn-changer-mode">Pas de compte? Créer un compte</button>
+      <p id="msg-connexion" class="message"></p>
+    </form>
+  </section>
+
+  <section id="ecran-liste" hidden>
+    <p id="bandeau-essai" class="bandeau" hidden>Mode essai : les données restent seulement sur cet appareil.</p>
+
+    <div class="resume">
+      <div><strong id="nb-retard">0</strong><span>en retard</span></div>
+      <div><strong id="nb-aujourdhui">0</strong><span>aujourd'hui</span></div>
+      <div><strong id="nb-vendus">0</strong><span>vendus ce mois</span></div>
+    </div>
+
+    <div class="onglets">
+      <button data-filtre="rappels" class="actif">À rappeler</button>
+      <button data-filtre="miens">Mes clients</button>
+      <button data-filtre="tous">Tous</button>
+    </div>
+
+    <input id="recherche" type="search" placeholder="Rechercher un nom, un numéro…">
+
+    <ul id="liste"></ul>
+    <p id="liste-vide" class="vide" hidden>Aucun client ici.</p>
+
+    <button id="btn-ajouter" class="flottant" aria-label="Ajouter un client">+</button>
+  </section>
+
+  <section id="ecran-fiche" hidden>
+    <form id="form-fiche" class="carte">
+      <h2 id="titre-fiche">Nouveau client</h2>
+
+      <label>Nom du client
+        <input name="nom" required>
+      </label>
+      <label>Téléphone
+        <input name="telephone" type="tel" inputmode="tel">
+      </label>
+      <label>Ce qu'on a proposé
+        <textarea name="offre" rows="2" placeholder="Ex. Internet Gigabit + Télé Fibe"></textarea>
+      </label>
+      <label>Notes
+        <textarea name="notes" rows="3" placeholder="Ex. attend la fin de son contrat Vidéotron en mars"></textarea>
+      </label>
+      <label>Statut
+        <select name="statut">
+          <option value="a_rappeler">À rappeler</option>
+          <option value="vendu">Vendu</option>
+          <option value="pas_interesse">Pas intéressé</option>
+        </select>
+      </label>
+      <label>Date de rappel / retour
+        <input name="rappel" type="date">
+      </label>
+
+      <div class="photo">
+        <img id="apercu-photo" alt="Photo" hidden>
+        <label class="bouton">
+          📷 Prendre / choisir une photo
+          <input id="input-photo" type="file" accept="image/*" capture="environment" hidden>
+        </label>
+        <button type="button" id="btn-retirer-photo" class="lien" hidden>Retirer la photo</button>
+      </div>
+
+      <p id="info-vendeur" class="petit"></p>
+
+      <div class="actions">
+        <button type="button" id="btn-annuler">Annuler</button>
+        <button type="submit" class="principal">Enregistrer</button>
+      </div>
+      <button type="button" id="btn-supprimer" class="lien danger" hidden>Supprimer ce client</button>
+      <p id="msg-fiche" class="message"></p>
+    </form>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

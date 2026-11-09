@@ -1,0 +1,160 @@
+:root {
+  --bleu: #00549a;
+  --fond: #f2f4f7;
+  --carte: #ffffff;
+  --texte: #1c1f24;
+  --gris: #6b7280;
+  --bordure: #d6dae0;
+  --rouge: #c62828;
+  --orange: #e67e00;
+  --vert: #2e7d32;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fond: #121418;
+    --carte: #1d2026;
+    --texte: #eceff3;
+    --gris: #9aa2ad;
+    --bordure: #333842;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fond);
+  color: var(--texte);
+  font-size: 16px;
+}
+
+header {
+  background: var(--bleu);
+  color: white;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+header h1 { font-size: 20px; margin: 0; }
+header .lien { color: white; }
+
+section { max-width: 640px; margin: 0 auto; padding: 16px; padding-bottom: 100px; }
+
+.carte {
+  background: var(--carte);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.carte h2 { margin: 0 0 4px; font-size: 20px; }
+
+label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--gris); }
+
+input, textarea, select {
+  font: inherit;
+  color: var(--texte);
+  background: var(--fond);
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  padding: 10px;
+  width: 100%;
+}
+
+button, .bouton {
+  font: inherit;
+  border: 1px solid var(--bordure);
+  background: var(--carte);
+  color: var(--texte);
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.principal { background: var(--bleu); color: white; border-color: var(--bleu); }
+
+.lien { background: none; border: none; color: var(--bleu); padding: 6px; }
+.danger { color: var(--rouge); }
+
+.message { margin: 0; color: var(--rouge); font-size: 14px; min-height: 1em; }
+.petit { margin: 0; color: var(--gris); font-size: 13px; }
+
+.bandeau {
+  background: #fff4d6;
+  color: #6b4e00;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-top: 0;
+}
+
+.resume { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.resume div { background: var(--carte); border-radius: 10px; padding: 10px; text-align: center; }
+.resume strong { display: block; font-size: 22px; }
+.resume span { font-size: 12px; color: var(--gris); }
+#nb-retard { color: var(--rouge); }
+#nb-aujourdhui { color: var(--orange); }
+#nb-vendus { color: var(--vert); }
+
+.onglets { display: flex; gap: 6px; margin-bottom: 10px; }
+.onglets button { flex: 1; padding: 8px 4px; font-size: 14px; }
+.onglets .actif { background: var(--bleu); color: white; border-color: var(--bleu); }
+
+#recherche { margin-bottom: 12px; }
+
+#liste { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+
+#liste li {
+  background: var(--carte);
+  border-radius: 10px;
+  padding: 12px;
+  border-left: 5px solid var(--bordure);
+  cursor: pointer;
+}
+
+#liste li.retard { border-left-color: var(--rouge); }
+#liste li.aujourdhui { border-left-color: var(--orange); }
+#liste li.vendu { border-left-color: var(--vert); }
+
+.ligne1 { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.ligne1 strong { font-size: 17px; }
+.date { font-size: 13px; color: var(--gris); white-space: nowrap; }
+.retard .date { color: var(--rouge); font-weight: 600; }
+.aujourdhui .date { color: var(--orange); font-weight: 600; }
+.offre { margin: 4px 0; font-size: 14px; }
+.bas { display: flex; justify-content: space-between; font-size: 13px; color: var(--gris); }
+.bas a { color: var(--bleu); text-decoration: none; }
+
+.vide { text-align: center; color: var(--gris); }
+
+.flottant {
+  position: fixed;
+  right: 20px;
+  bottom: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 32px;
+  line-height: 1;
+  padding: 0;
+  background: var(--bleu);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.photo { display: flex; flex-direction: column; gap: 8px; }
+.photo img { width: 100%; border-radius: 8px; }
+
+.actions { display: flex; gap: 8px; }
+.actions button { flex: 1; }
