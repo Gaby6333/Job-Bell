@@ -1,6 +1,6 @@
 {
-  "name": "PL",
-  "short_name": "PL",
+  "name": "Espace Équipe",
+  "short_name": "Équipe",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f2f4f7",

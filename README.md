@@ -1,4 +1,4 @@
-# PL
+# Espace Équipe
 
 App de l'équipe. Première section : les suivis clients (BRS, ventes à la maison, etc.), au même endroit pour tout le monde. D'autres outils viendront s'ajouter avec le temps.
 
