@@ -1,6 +1,6 @@
-# Suivis Clients
+# PL
 
-Petite app web pour que toute l'équipe suive ses clients (BRS, ventes à la maison, etc.) au même endroit.
+App de l'équipe. Première section : les suivis clients (BRS, ventes à la maison, etc.), au même endroit pour tout le monde. D'autres outils viendront s'ajouter avec le temps.
 
 - Nom, téléphone, ce qu'on a proposé, notes
 - Statut : à rappeler / vendu / pas intéressé

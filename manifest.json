@@ -1,6 +1,6 @@
 {
-  "name": "Suivis Clients",
-  "short_name": "Suivis",
+  "name": "PL",
+  "short_name": "PL",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f2f4f7",

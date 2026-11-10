@@ -158,3 +158,5 @@ button, .bouton {
 
 .actions { display: flex; gap: 8px; }
 .actions button { flex: 1; }
+
+.titre-section { margin: 0 0 12px; font-size: 18px; }
