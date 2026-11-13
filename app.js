@@ -8,7 +8,9 @@ let modeInscription = false
 
 const modeEssai = !SUPABASE_URL || !SUPABASE_KEY
 if (!modeEssai) {
-  db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  })
 }
 
 function $(id) {
@@ -59,6 +61,7 @@ async function demarrer() {
     await chargerClients()
     montrer("liste")
   } else {
+    $("form-connexion").courriel.value = localStorage.getItem("courriel") || ""
     montrer("connexion")
   }
 }
@@ -76,6 +79,7 @@ $("form-connexion").onsubmit = async function (e) {
   e.preventDefault()
   const form = e.target
   const courriel = form.courriel.value.trim()
+  localStorage.setItem("courriel", courriel)
   const motdepasse = form.motdepasse.value
   const nom = form.nom.value.trim()
   $("msg-connexion").textContent = ""
