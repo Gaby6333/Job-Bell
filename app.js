@@ -19,7 +19,12 @@ function montrer(ecran) {
   $("ecran-connexion").hidden = ecran !== "connexion"
   $("ecran-liste").hidden = ecran !== "liste"
   $("ecran-fiche").hidden = ecran !== "fiche"
+  $("ecran-forfaits").hidden = ecran !== "forfaits"
+  $("menu").hidden = ecran !== "liste" && ecran !== "forfaits"
   $("btn-deconnexion").hidden = modeEssai || ecran === "connexion"
+  document.querySelectorAll("#menu button").forEach(function (b) {
+    b.classList.toggle("actif", b.dataset.ecran === ecran)
+  })
   window.scrollTo(0, 0)
 }
 
@@ -133,7 +138,7 @@ async function chargerClients() {
   } else {
     const reponse = await db
       .from("clients")
-      .select("id, created_at, user_id, vendeur, nom, telephone, offre, notes, statut, rappel, modifie_par")
+      .select("id, created_at, user_id, vendeur, nom, telephone, zone, offre, notes, statut, rappel, modifie_par")
       .order("rappel", { ascending: true, nullsFirst: false })
     if (reponse.error) {
       alert("Erreur de chargement : " + reponse.error.message)
@@ -257,7 +262,7 @@ function afficherListe() {
     li.querySelector("strong").textContent = c.nom
     li.querySelector(".date").textContent = date
     li.querySelector(".offre").textContent = c.offre || ""
-    li.querySelector(".vendeur").textContent = c.vendeur || ""
+    li.querySelector(".vendeur").textContent = (c.vendeur || "") + (c.zone ? " · " + c.zone : "")
 
     const lienTel = li.querySelector(".tel")
     if (c.telephone) {
@@ -301,6 +306,7 @@ async function ouvrirFiche(client) {
     $("titre-fiche").textContent = client.nom
     form.nom.value = client.nom
     form.telephone.value = client.telephone || ""
+    form.zone.value = client.zone || ""
     form.offre.value = client.offre || ""
     form.notes.value = client.notes || ""
     form.statut.value = client.statut || "a_rappeler"
@@ -312,6 +318,7 @@ async function ouvrirFiche(client) {
     $("info-vendeur").textContent = info
 
     $("btn-supprimer").hidden = client.user_id !== user.id
+    afficherPropositions()
     montrer("fiche")
 
     photo = await chargerPhoto(client.id)
@@ -321,6 +328,7 @@ async function ouvrirFiche(client) {
     $("titre-fiche").textContent = "Nouveau client"
     $("info-vendeur").textContent = ""
     $("btn-supprimer").hidden = true
+    afficherPropositions()
     montrer("fiche")
   }
 }
@@ -373,6 +381,7 @@ $("form-fiche").onsubmit = async function (e) {
   const infos = {
     nom: form.nom.value.trim(),
     telephone: form.telephone.value.trim(),
+    zone: form.zone.value || null,
     offre: form.offre.value.trim(),
     notes: form.notes.value.trim(),
     statut: form.statut.value,
@@ -400,6 +409,89 @@ $("btn-supprimer").onclick = async function () {
   }
   await chargerClients()
   montrer("liste")
+}
+
+// ---------- Forfaits Internet ----------
+
+let zoneAffichee = 0
+
+document.querySelectorAll("#menu button").forEach(function (bouton) {
+  bouton.onclick = function () {
+    if (bouton.dataset.ecran === "forfaits") afficherForfaits()
+    montrer(bouton.dataset.ecran)
+  }
+})
+
+function afficherForfaits() {
+  const choix = $("choix-zone")
+  choix.innerHTML = ""
+  ZONES.forEach(function (zone, i) {
+    const bouton = document.createElement("button")
+    bouton.textContent = zone.nom
+    bouton.style.borderColor = zone.couleur
+    if (i === zoneAffichee) {
+      bouton.style.background = zone.couleur
+      bouton.style.color = "white"
+    } else {
+      bouton.style.color = zone.couleur
+    }
+    bouton.onclick = function () {
+      zoneAffichee = i
+      afficherForfaits()
+    }
+    choix.appendChild(bouton)
+  })
+
+  const zone = ZONES[zoneAffichee]
+  $("desc-zone").textContent = zone.description
+
+  const liste = $("liste-forfaits")
+  liste.innerHTML = ""
+  for (const f of zone.forfaits) {
+    const li = document.createElement("li")
+    li.style.borderLeftColor = zone.couleur
+    li.innerHTML = `
+      <div class="vitesse"></div>
+      <div class="infos"><strong></strong><span class="note"></span></div>
+      <div class="prix"></div>
+    `
+    li.querySelector(".vitesse").textContent = f.vitesse
+    li.querySelector(".vitesse").style.color = zone.couleur
+    li.querySelector("strong").textContent = f.nom
+    li.querySelector(".note").textContent = f.note || ""
+    li.querySelector(".prix").textContent = f.prix
+    liste.appendChild(li)
+  }
+}
+
+for (const zone of ZONES) {
+  const option = document.createElement("option")
+  option.value = zone.nom
+  option.textContent = zone.nom + " – " + zone.description
+  $("select-zone").appendChild(option)
+}
+
+$("select-zone").onchange = afficherPropositions
+
+function afficherPropositions() {
+  const boite = $("propositions")
+  boite.innerHTML = ""
+  const zone = ZONES.find(z => z.nom === $("select-zone").value)
+  if (!zone) return
+
+  for (const f of zone.forfaits) {
+    const puce = document.createElement("button")
+    puce.type = "button"
+    puce.textContent = f.nom + " · " + f.vitesse
+    puce.style.borderColor = zone.couleur
+    puce.style.color = zone.couleur
+    puce.onclick = function () {
+      const offre = $("form-fiche").offre
+      const texte = f.nom + " (" + f.vitesse + ", " + f.prix + ")"
+      offre.value = offre.value.trim() ? offre.value.trim() + " + " + texte : texte
+    }
+    boite.appendChild(puce)
+  }
 }
 
 demarrer()

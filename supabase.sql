@@ -12,6 +12,7 @@ create table clients (
   notes text,
   statut text default 'a_rappeler',
   rappel date,
+  zone text,
   photo text
 );
 
@@ -24,3 +25,6 @@ create policy "modifier" on clients for update to authenticated using (true);
 
 -- Seulement la personne qui a créé le client peut le supprimer
 create policy "supprimer" on clients for delete to authenticated using (auth.uid() = user_id);
+
+-- Ajout de la zone Internet (si la table existait déjà)
+-- alter table clients add column if not exists zone text;

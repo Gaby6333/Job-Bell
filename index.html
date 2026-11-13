@@ -12,10 +12,17 @@
 </head>
 <body>
 
+  <div class="haut">
   <header>
     <h1>Espace Équipe</h1>
     <button id="btn-deconnexion" class="lien" hidden>Déconnexion</button>
   </header>
+
+  <nav id="menu" hidden>
+    <button data-ecran="liste" class="actif">Clients</button>
+    <button data-ecran="forfaits">Forfaits Internet</button>
+  </nav>
+  </div>
 
   <section id="ecran-connexion" hidden>
     <form id="form-connexion" class="carte">
@@ -38,8 +45,6 @@
   <section id="ecran-liste" hidden>
     <p id="bandeau-essai" class="bandeau" hidden>Mode essai : les données restent seulement sur cet appareil.</p>
 
-    <h2 class="titre-section">Suivis clients</h2>
-
     <div class="resume">
       <div><strong id="nb-retard">0</strong><span>en retard</span></div>
       <div><strong id="nb-aujourdhui">0</strong><span>aujourd'hui</span></div>
@@ -60,6 +65,12 @@
     <button id="btn-ajouter" class="flottant" aria-label="Ajouter un client">+</button>
   </section>
 
+  <section id="ecran-forfaits" hidden>
+    <div id="choix-zone" class="zones"></div>
+    <p id="desc-zone" class="petit"></p>
+    <ul id="liste-forfaits"></ul>
+  </section>
+
   <section id="ecran-fiche" hidden>
     <form id="form-fiche" class="carte">
       <h2 id="titre-fiche">Nouveau client</h2>
@@ -70,6 +81,12 @@
       <label>Téléphone
         <input name="telephone" type="tel" inputmode="tel">
       </label>
+      <label>Zone Internet
+        <select name="zone" id="select-zone">
+          <option value="">Pas d'Internet / je ne sais pas</option>
+        </select>
+      </label>
+      <div id="propositions" class="puces"></div>
       <label>Ce qu'on a proposé
         <textarea name="offre" rows="2" placeholder="Ex. Internet Gigabit + Télé Fibe"></textarea>
       </label>
@@ -109,6 +126,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
+  <script src="forfaits.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
