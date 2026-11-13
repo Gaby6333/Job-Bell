@@ -199,3 +199,7 @@ button, .bouton {
 .puces { display: flex; flex-wrap: wrap; gap: 6px; }
 .puces:empty { display: none; }
 .puces button { background: none; border: 1.5px solid; border-radius: 20px; padding: 6px 12px; font-size: 14px; }
+
+.plein { width: 100%; margin-top: 12px; }
+#liste-forfaits { margin-top: 12px; }
+#liste-forfaits li.modifiable { cursor: pointer; outline: 2px dashed var(--bordure); }

@@ -20,6 +20,7 @@ function montrer(ecran) {
   $("ecran-liste").hidden = ecran !== "liste"
   $("ecran-fiche").hidden = ecran !== "fiche"
   $("ecran-forfaits").hidden = ecran !== "forfaits"
+  $("ecran-forfait").hidden = ecran !== "forfait"
   $("menu").hidden = ecran !== "liste" && ecran !== "forfaits"
   $("btn-deconnexion").hidden = modeEssai || ecran === "connexion"
   document.querySelectorAll("#menu button").forEach(function (b) {
@@ -53,6 +54,7 @@ async function demarrer() {
   if (modeEssai) {
     user = { id: "local" }
     $("bandeau-essai").hidden = false
+    await chargerForfaits()
     await chargerClients()
     montrer("liste")
     return
@@ -61,6 +63,7 @@ async function demarrer() {
   const reponse = await db.auth.getSession()
   if (reponse.data.session) {
     user = reponse.data.session.user
+    await chargerForfaits()
     await chargerClients()
     montrer("liste")
   } else {
@@ -110,6 +113,7 @@ $("form-connexion").onsubmit = async function (e) {
   }
 
   user = reponse.data.session.user
+  await chargerForfaits()
   await chargerClients()
   montrer("liste")
 }
@@ -306,7 +310,7 @@ async function ouvrirFiche(client) {
     $("titre-fiche").textContent = client.nom
     form.nom.value = client.nom
     form.telephone.value = client.telephone || ""
-    form.zone.value = client.zone || ""
+    remplirSelectZone(client.zone)
     form.offre.value = client.offre || ""
     form.notes.value = client.notes || ""
     form.statut.value = client.statut || "a_rappeler"
@@ -325,6 +329,7 @@ async function ouvrirFiche(client) {
     afficherPhoto()
   } else {
     ficheId = null
+    remplirSelectZone("")
     $("titre-fiche").textContent = "Nouveau client"
     $("info-vendeur").textContent = ""
     $("btn-supprimer").hidden = true
@@ -413,7 +418,38 @@ $("btn-supprimer").onclick = async function () {
 
 // ---------- Forfaits Internet ----------
 
-let zoneAffichee = 0
+let forfaits = []
+let zoneAffichee = null
+let modeModif = false
+let forfaitId = null
+const couleurs = ["#00549a", "#7b3fa0", "#00897b", "#c75b00"]
+
+async function chargerForfaits() {
+  if (modeEssai) {
+    forfaits = JSON.parse(localStorage.getItem("forfaits") || "[]")
+  } else {
+    const reponse = await db.from("forfaits").select("*").order("zone").order("id")
+    if (reponse.error) {
+      alert("Erreur de chargement des forfaits : " + reponse.error.message)
+      return
+    }
+    forfaits = reponse.data
+  }
+  remplirSelectZone($("select-zone").value)
+}
+
+function listeZones() {
+  const zones = []
+  for (const f of forfaits) {
+    if (!zones.includes(f.zone)) zones.push(f.zone)
+  }
+  return zones.sort()
+}
+
+function couleurZone(zone) {
+  const i = listeZones().indexOf(zone)
+  return couleurs[Math.max(i, 0) % couleurs.length]
+}
 
 document.querySelectorAll("#menu button").forEach(function (bouton) {
   bouton.onclick = function () {
@@ -422,72 +458,186 @@ document.querySelectorAll("#menu button").forEach(function (bouton) {
   }
 })
 
+$("btn-modifier-forfaits").onclick = function () {
+  modeModif = !modeModif
+  afficherForfaits()
+}
+
 function afficherForfaits() {
+  const zones = listeZones()
+  if (!zones.includes(zoneAffichee)) zoneAffichee = zones[0] || null
+
+  $("btn-modifier-forfaits").textContent = modeModif ? "Terminé" : "✏️ Modifier les forfaits"
+  $("btn-ajouter-forfait").hidden = !modeModif
+
   const choix = $("choix-zone")
   choix.innerHTML = ""
-  ZONES.forEach(function (zone, i) {
+  for (const zone of zones) {
+    const couleur = couleurZone(zone)
     const bouton = document.createElement("button")
-    bouton.textContent = zone.nom
-    bouton.style.borderColor = zone.couleur
-    if (i === zoneAffichee) {
-      bouton.style.background = zone.couleur
+    bouton.textContent = zone
+    bouton.style.borderColor = couleur
+    if (zone === zoneAffichee) {
+      bouton.style.background = couleur
       bouton.style.color = "white"
     } else {
-      bouton.style.color = zone.couleur
+      bouton.style.color = couleur
     }
     bouton.onclick = function () {
-      zoneAffichee = i
+      zoneAffichee = zone
       afficherForfaits()
     }
     choix.appendChild(bouton)
-  })
-
-  const zone = ZONES[zoneAffichee]
-  $("desc-zone").textContent = zone.description
+  }
 
   const liste = $("liste-forfaits")
   liste.innerHTML = ""
-  for (const f of zone.forfaits) {
+  $("forfaits-vide").hidden = zones.length > 0
+
+  for (const f of forfaits.filter(f => f.zone === zoneAffichee)) {
+    const couleur = couleurZone(f.zone)
     const li = document.createElement("li")
-    li.style.borderLeftColor = zone.couleur
+    li.style.borderLeftColor = couleur
     li.innerHTML = `
       <div class="vitesse"></div>
       <div class="infos"><strong></strong><span class="note"></span></div>
       <div class="prix"></div>
     `
-    li.querySelector(".vitesse").textContent = f.vitesse
-    li.querySelector(".vitesse").style.color = zone.couleur
+    li.querySelector(".vitesse").textContent = f.vitesse || ""
+    li.querySelector(".vitesse").style.color = couleur
     li.querySelector("strong").textContent = f.nom
     li.querySelector(".note").textContent = f.note || ""
-    li.querySelector(".prix").textContent = f.prix
+    li.querySelector(".prix").textContent = f.prix || ""
+    if (modeModif) {
+      li.classList.add("modifiable")
+      li.onclick = () => ouvrirForfait(f)
+    }
     liste.appendChild(li)
   }
 }
 
-for (const zone of ZONES) {
-  const option = document.createElement("option")
-  option.value = zone.nom
-  option.textContent = zone.nom + " – " + zone.description
-  $("select-zone").appendChild(option)
+$("btn-ajouter-forfait").onclick = () => ouvrirForfait(null)
+
+function ouvrirForfait(f) {
+  const form = $("form-forfait")
+  form.reset()
+  $("msg-forfait").textContent = ""
+
+  const choix = $("zones-existantes")
+  choix.innerHTML = ""
+  for (const zone of listeZones()) {
+    const option = document.createElement("option")
+    option.value = zone
+    choix.appendChild(option)
+  }
+
+  if (f) {
+    forfaitId = f.id
+    $("titre-forfait").textContent = "Modifier le forfait"
+    form.zone.value = f.zone
+    form.nom.value = f.nom
+    form.vitesse.value = f.vitesse || ""
+    form.prix.value = f.prix || ""
+    form.note.value = f.note || ""
+    $("btn-supprimer-forfait").hidden = false
+  } else {
+    forfaitId = null
+    $("titre-forfait").textContent = "Nouveau forfait"
+    form.zone.value = zoneAffichee || ""
+    $("btn-supprimer-forfait").hidden = true
+  }
+  montrer("forfait")
+}
+
+$("form-forfait").onsubmit = async function (e) {
+  e.preventDefault()
+  const form = e.target
+  const infos = {
+    zone: form.zone.value.trim(),
+    nom: form.nom.value.trim(),
+    vitesse: form.vitesse.value.trim(),
+    prix: form.prix.value.trim(),
+    note: form.note.value.trim()
+  }
+
+  let erreur = null
+  if (modeEssai) {
+    if (forfaitId) {
+      Object.assign(forfaits.find(f => f.id === forfaitId), infos)
+    } else {
+      infos.id = Date.now()
+      forfaits.push(infos)
+    }
+    localStorage.setItem("forfaits", JSON.stringify(forfaits))
+  } else if (forfaitId) {
+    erreur = (await db.from("forfaits").update(infos).eq("id", forfaitId)).error
+  } else {
+    erreur = (await db.from("forfaits").insert(infos)).error
+  }
+
+  if (erreur) {
+    $("msg-forfait").textContent = "Erreur : " + erreur.message
+    return
+  }
+  zoneAffichee = infos.zone
+  await chargerForfaits()
+  afficherForfaits()
+  montrer("forfaits")
+}
+
+$("btn-annuler-forfait").onclick = () => montrer("forfaits")
+
+$("btn-supprimer-forfait").onclick = async function () {
+  if (!confirm("Supprimer ce forfait?")) return
+  let erreur = null
+  if (modeEssai) {
+    forfaits = forfaits.filter(f => f.id !== forfaitId)
+    localStorage.setItem("forfaits", JSON.stringify(forfaits))
+  } else {
+    erreur = (await db.from("forfaits").delete().eq("id", forfaitId)).error
+  }
+  if (erreur) {
+    $("msg-forfait").textContent = "Erreur : " + erreur.message
+    return
+  }
+  await chargerForfaits()
+  afficherForfaits()
+  montrer("forfaits")
+}
+
+function remplirSelectZone(valeur) {
+  const select = $("select-zone")
+  const zones = listeZones()
+  if (valeur && !zones.includes(valeur)) zones.push(valeur)
+  select.innerHTML = '<option value="">Pas d\'Internet / je ne sais pas</option>'
+  for (const zone of zones) {
+    const option = document.createElement("option")
+    option.value = zone
+    option.textContent = zone
+    select.appendChild(option)
+  }
+  select.value = valeur || ""
 }
 
 $("select-zone").onchange = afficherPropositions
 
 function afficherPropositions() {
+  const select = $("select-zone")
   const boite = $("propositions")
   boite.innerHTML = ""
-  const zone = ZONES.find(z => z.nom === $("select-zone").value)
-  if (!zone) return
 
-  for (const f of zone.forfaits) {
+  const couleur = couleurZone(select.value)
+  for (const f of forfaits.filter(f => f.zone === select.value)) {
     const puce = document.createElement("button")
     puce.type = "button"
-    puce.textContent = f.nom + " · " + f.vitesse
-    puce.style.borderColor = zone.couleur
-    puce.style.color = zone.couleur
+    puce.textContent = f.nom + (f.vitesse ? " · " + f.vitesse : "")
+    puce.style.borderColor = couleur
+    puce.style.color = couleur
     puce.onclick = function () {
       const offre = $("form-fiche").offre
-      const texte = f.nom + " (" + f.vitesse + ", " + f.prix + ")"
+      let texte = f.nom
+      const details = [f.vitesse, f.prix].filter(Boolean).join(", ")
+      if (details) texte += " (" + details + ")"
       offre.value = offre.value.trim() ? offre.value.trim() + " + " + texte : texte
     }
     boite.appendChild(puce)

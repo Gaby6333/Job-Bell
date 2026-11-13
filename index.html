@@ -67,8 +67,38 @@
 
   <section id="ecran-forfaits" hidden>
     <div id="choix-zone" class="zones"></div>
-    <p id="desc-zone" class="petit"></p>
     <ul id="liste-forfaits"></ul>
+    <p id="forfaits-vide" class="vide" hidden>Aucun forfait pour l'instant. Touche « Modifier les forfaits » pour en ajouter.</p>
+    <button id="btn-ajouter-forfait" class="principal plein" hidden>+ Ajouter un forfait</button>
+    <button id="btn-modifier-forfaits" class="lien plein">✏️ Modifier les forfaits</button>
+  </section>
+
+  <section id="ecran-forfait" hidden>
+    <form id="form-forfait" class="carte">
+      <h2 id="titre-forfait">Nouveau forfait</h2>
+      <label>Zone
+        <input name="zone" list="zones-existantes" required placeholder="Ex. Zone 1">
+        <datalist id="zones-existantes"></datalist>
+      </label>
+      <label>Nom du forfait
+        <input name="nom" required placeholder="Ex. Gigabit Fibe 1.5">
+      </label>
+      <label>Vitesse
+        <input name="vitesse" placeholder="Ex. 1,5 Gbit/s">
+      </label>
+      <label>Prix
+        <input name="prix" placeholder="Ex. 95 $/mois">
+      </label>
+      <label>Pour qui / note
+        <input name="note" placeholder="Ex. Famille, télétravail">
+      </label>
+      <div class="actions">
+        <button type="button" id="btn-annuler-forfait">Annuler</button>
+        <button type="submit" class="principal">Enregistrer</button>
+      </div>
+      <button type="button" id="btn-supprimer-forfait" class="lien danger" hidden>Supprimer ce forfait</button>
+      <p id="msg-forfait" class="message"></p>
+    </form>
   </section>
 
   <section id="ecran-fiche" hidden>
@@ -83,7 +113,6 @@
       </label>
       <label>Zone Internet
         <select name="zone" id="select-zone">
-          <option value="">Pas d'Internet / je ne sais pas</option>
         </select>
       </label>
       <div id="propositions" class="puces"></div>
@@ -126,7 +155,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
-  <script src="forfaits.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

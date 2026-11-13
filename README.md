@@ -8,6 +8,7 @@ App de l'équipe. Première section : les suivis clients (BRS, ventes à la mais
 - Photo (prise directement avec le téléphone) attachée au client
 - Tout le monde voit les clients de l'équipe, n'importe qui peut ajouter une note ou une photo
 - Bouton 📞 pour appeler le client directement
+- Page Forfaits Internet par zone, modifiable directement dans l'app par l'équipe
 - S'installe sur l'écran d'accueil du téléphone comme une app
 
 Tout est gratuit : l'app est hébergée sur GitHub Pages et les données sont dans Supabase (plan gratuit).
