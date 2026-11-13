@@ -127,9 +127,16 @@ function montrer(ecran) {
   const principal = ["accueil", "clients", "brs"].includes(ecran)
   if (principal) ecranActuel = ecran
 
+  const titres = { accueil: "Aujourd'hui", clients: "Clients", brs: "BRS" }
+  $("titre-ecran").textContent = titres[ecran] || ""
+
+  $("haut").hidden = !principal
   $("nav").hidden = !principal
+  $("btn-plus").hidden = !principal || ecran === "accueil"
   $("barre-portee").hidden = !principal
-  $("btn-deconnexion").hidden = modeEssai || ecran === "connexion"
+  $("btn-deconnexion").hidden = modeEssai || !principal
+  $("feuille").hidden = true
+  document.body.classList.toggle("page-connexion", ecran === "connexion")
 
   document.querySelectorAll("#nav button").forEach(function (b) {
     b.classList.toggle("actif", b.dataset.ecran === ecran)
@@ -156,10 +163,16 @@ document.querySelectorAll("#barre-portee button").forEach(function (bouton) {
 
 document.querySelectorAll("[data-ajouter]").forEach(function (bouton) {
   bouton.onclick = function () {
-    if (bouton.dataset.ajouter === "brs") ouvrirBrs(null)
+    $("feuille").hidden = true
+    if (bouton.dataset.ajouter === "brs-bell") ouvrirBrs(null, "Bell")
+    else if (bouton.dataset.ajouter === "brs-virgin") ouvrirBrs(null, "Virgin")
     else ouvrirClient(null)
   }
 })
+
+$("btn-plus").onclick = () => $("feuille").hidden = false
+document.querySelector(".feuille-fond").onclick = () => $("feuille").hidden = true
+document.querySelector(".fermer-feuille").onclick = () => $("feuille").hidden = true
 
 
 // ---------- Connexion ----------
@@ -348,25 +361,37 @@ function correspond(element, recherche) {
   return texte.includes(recherche) || (chiffres.length >= 3 && tel.includes(chiffres))
 }
 
-function creerCarte(titre, badge, couleur, details, telephone, vendeur) {
+function initiales(nom) {
+  return (nom || "?").trim().split(/\s+/).slice(0, 2).map(m => m[0]).join("").toUpperCase()
+}
+
+function creerCarte(element, badge, couleur, details, avatar) {
   const li = document.createElement("li")
   li.className = "item"
   li.innerHTML = `
-    <div class="ligne1"><strong></strong><span class="badge"></span></div>
-    <p class="details"></p>
-    <div class="bas"><span class="qui"></span><span class="liens"></span></div>
+    <div class="rangee">
+      <div class="avatar"></div>
+      <div class="corps">
+        <strong></strong>
+        <p class="details"></p>
+        <div class="ligne-bas"><span class="badge"></span><span class="qui"></span></div>
+      </div>
+      <div class="liens"></div>
+    </div>
   `
-  li.querySelector("strong").textContent = titre
-  li.querySelector(".badge").textContent = badge
-  li.querySelector(".badge").classList.add(couleur)
+  li.querySelector(".avatar").textContent = initiales(element.nom)
+  li.querySelector(".avatar").classList.add(avatar)
+  li.querySelector("strong").textContent = element.nom
   li.querySelector(".details").textContent = details || ""
   li.querySelector(".details").hidden = !details
-  li.querySelector(".qui").textContent = vendeur || ""
+  li.querySelector(".badge").textContent = badge
+  li.querySelector(".badge").classList.add(couleur)
+  li.querySelector(".qui").textContent = element.vendeur || ""
 
-  if (telephone) {
-    const chiffres = telephone.replace(/[^\d+]/g, "")
+  if (element.telephone) {
+    const chiffres = element.telephone.replace(/[^\d+]/g, "")
     const liens = li.querySelector(".liens")
-    liens.innerHTML = `<a>📞 Appeler</a><a>💬 Texto</a>`
+    liens.innerHTML = `<a class="rond" aria-label="Appeler">📞</a><a class="rond" aria-label="Texto">💬</a>`
     liens.children[0].href = "tel:" + chiffres
     liens.children[1].href = "sms:" + chiffres
     liens.children[0].onclick = e => e.stopPropagation()
@@ -383,17 +408,23 @@ function carteClient(c) {
   if (c.statut === "a_rappeler") {
     couleur = "bleu"
     if (c.rappel) {
-      badge = dateTexte(c.rappel)
+      badge = "📞 " + dateTexte(c.rappel)
       const jours = joursAvant(c.rappel)
       if (jours < 0) couleur = "rouge"
       if (jours === 0) couleur = "orange"
     }
   }
 
-  const li = creerCarte(c.nom, badge, couleur, c.offre, c.telephone, c.vendeur)
-  li.classList.add("bord-" + couleur)
+  const li = creerCarte(c, badge, couleur, c.offre, couleur)
   li.onclick = () => ouvrirClient(c)
   return li
+}
+
+function etapeBrs(b) {
+  if (b.statut === "complete") return 4
+  if (b.rappele) return 3
+  if (b.statut === "installe") return 2
+  return 1
 }
 
 function carteBrs(b, action) {
@@ -401,24 +432,37 @@ function carteBrs(b, action) {
   let couleur = { en_attente: "bleu", installe: "orange", probleme: "rouge", complete: "vert" }[b.statut] || "gris"
 
   if (b.statut === "en_attente" && b.date_install) {
-    badge = "Install. " + dateTexte(b.date_install).toLowerCase()
+    badge = "🗓 " + dateTexte(b.date_install)
     const jours = joursAvant(b.date_install)
     if (jours < 0) couleur = "rouge"
     if (jours === 0) couleur = "orange"
   }
-  if (b.statut === "installe" && !b.rappele) badge = "Installé · à rappeler"
+  if (b.statut === "installe" && !b.rappele) badge = "À rappeler"
 
-  let details = [b.marque === "Virgin" ? "Virgin Plus" : "Bell", b.services].filter(Boolean).join(" · ")
-  if (b.commande) details += " · #" + b.commande
+  let details = b.services || ""
+  if (b.commande) details += (details ? " · " : "") + "#" + b.commande
 
-  const li = creerCarte(b.nom, badge, couleur, details, b.telephone, b.vendeur)
-  li.classList.add(b.marque === "Virgin" ? "virgin" : "bell")
+  const marque = b.marque === "Virgin" ? "virgin" : "bell"
+  const li = creerCarte(b, badge, couleur, details, marque)
+
+  const etape = etapeBrs(b)
+  const progres = document.createElement("div")
+  progres.className = "progres" + (b.statut === "probleme" ? " probleme" : "")
+  for (let i = 1; i <= 4; i++) {
+    const barre = document.createElement("i")
+    if (i <= etape) barre.className = "fait"
+    progres.appendChild(barre)
+  }
+  const etapes = document.createElement("div")
+  etapes.className = "etapes"
+  etapes.innerHTML = "<span>Commandé</span><span>Installé</span><span>Rappelé</span><span>Terminé</span>"
+  li.querySelector(".details").after(progres, etapes)
 
   if (b.statut === "probleme" && b.probleme) {
     const alerte = document.createElement("p")
     alerte.className = "alerte"
     alerte.textContent = "⚠️ " + b.probleme
-    li.querySelector(".details").after(alerte)
+    li.appendChild(alerte)
   }
 
   if (action) {
@@ -427,8 +471,10 @@ function carteBrs(b, action) {
     bouton.textContent = action.texte
     bouton.onclick = async function (e) {
       e.stopPropagation()
+      bouton.disabled = true
       const erreur = await sauver("brs", b.id, Object.assign({}, action.champs))
       if (erreur) {
+        bouton.disabled = false
         alert("Erreur : " + erreur.message)
         return
       }
@@ -458,8 +504,10 @@ function afficherAccueil() {
   const mesBrs = visibles(brs)
 
   const prenom = modeEssai ? "" : " " + nomUser().split(" ")[0]
-  const date = new Date().toLocaleDateString("fr-CA", { weekday: "long", day: "numeric", month: "long" })
-  $("bonjour").textContent = "Bonjour" + prenom + " 👋 · " + date
+  const heure = new Date().getHours()
+  const salut = heure < 12 ? "Bon matin" : heure < 18 ? "Bonjour" : "Bonsoir"
+  $("hero-date").textContent = new Date().toLocaleDateString("fr-CA", { weekday: "long", day: "numeric", month: "long" })
+  $("bonjour").textContent = salut + prenom + " 👋"
 
   $("stat-ventes").textContent = mesClients.filter(c => c.statut === "vendu" && (c.created_at || "").slice(0, 7) === moisCourant).length
   $("stat-installs").textContent = mesBrs.filter(b => (b.statut === "installe" || b.statut === "complete") && (b.date_install || "").slice(0, 7) === moisCourant).length
@@ -523,6 +571,10 @@ function afficherAccueil() {
     }
     boite.appendChild(div)
   }
+
+  if (urgent === 0) $("hero-resume").textContent = "Tout est à jour. Rien d'urgent aujourd'hui."
+  else if (urgent === 1) $("hero-resume").textContent = "Tu as 1 chose à faire aujourd'hui."
+  else $("hero-resume").textContent = "Tu as " + urgent + " choses à faire aujourd'hui."
 
   $("pastille").textContent = urgent
   $("pastille").hidden = urgent === 0
@@ -662,10 +714,10 @@ async function ouvrirClient(c) {
   }
 }
 
-async function ouvrirBrs(b) {
+async function ouvrirBrs(b, marque) {
   const form = $("form-brs")
   ficheId = b ? b.id : null
-  remplir(form, b || { marque: "Bell", statut: "en_attente" }, CHAMPS_BRS)
+  remplir(form, b || { marque: marque || "Bell", statut: "en_attente" }, CHAMPS_BRS)
   preparerFiche(form, b, b ? b.nom : "Nouveau BRS")
   montrer("fiche-brs")
   if (b) {

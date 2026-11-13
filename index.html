@@ -11,19 +11,19 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Équipe">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="style.css?v=3">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
-  <div class="haut">
+  <div class="haut" id="haut">
     <header>
-      <h1>Espace Équipe</h1>
-      <button id="btn-deconnexion" class="lien" hidden>Déconnexion</button>
+      <h1 id="titre-ecran">Aujourd'hui</h1>
+      <button id="btn-deconnexion" class="lien-blanc" hidden>Déconnexion</button>
     </header>
     <div id="barre-portee" class="segment" hidden>
-      <button data-moi="0">👥 Toute l'équipe</button>
-      <button data-moi="1">🙋 Les miens</button>
+      <button data-moi="0">Toute l'équipe</button>
+      <button data-moi="1">Les miens</button>
     </div>
   </div>
 
@@ -33,10 +33,13 @@
 
   <!-- Connexion -->
   <section id="ecran-connexion" hidden>
-    <form id="form-connexion" class="carte connexion">
+    <div class="connexion-haut">
       <img src="icon.svg" alt="" class="logo">
-      <h2 id="titre-connexion">Connexion</h2>
-      <p class="petit">Suivis clients et BRS de l'équipe</p>
+      <h2>Espace Équipe</h2>
+      <p>Suivis clients et BRS de l'équipe</p>
+    </div>
+    <form id="form-connexion" class="carte">
+      <h3 id="titre-connexion">Connexion</h3>
       <label id="champ-nom" hidden>Ton nom
         <input name="nom" autocomplete="name" placeholder="Ex. Gabriel">
       </label>
@@ -55,17 +58,34 @@
 
   <!-- Aujourd'hui -->
   <section id="ecran-accueil" hidden>
-    <p id="bonjour" class="bonjour"></p>
-
-    <div class="resume">
-      <div><strong id="stat-ventes" class="vert">0</strong><span>ventes ce mois</span></div>
-      <div><strong id="stat-installs" class="bleu">0</strong><span>installations ce mois</span></div>
-      <div><strong id="stat-problemes" class="rouge">0</strong><span>problèmes BRS</span></div>
+    <div class="hero">
+      <p id="hero-date" class="hero-date"></p>
+      <h2 id="bonjour" class="hero-titre"></h2>
+      <p id="hero-resume" class="hero-resume"></p>
     </div>
 
-    <div class="ajouts">
-      <button class="principal gros" data-ajouter="client">+ Client</button>
-      <button class="principal gros" data-ajouter="brs">+ BRS</button>
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-icone vert-fond">💰</span>
+        <strong id="stat-ventes">0</strong>
+        <span>ventes ce mois</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icone bleu-fond">🔧</span>
+        <strong id="stat-installs">0</strong>
+        <span>installs ce mois</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icone rouge-fond">⚠️</span>
+        <strong id="stat-problemes">0</strong>
+        <span>problèmes</span>
+      </div>
+    </div>
+
+    <div class="raccourcis">
+      <button data-ajouter="client"><span class="rond-icone client">👤</span>Client</button>
+      <button data-ajouter="brs-bell"><span class="rond-icone bell">B</span>BRS Bell</button>
+      <button data-ajouter="brs-virgin"><span class="rond-icone virgin">V</span>BRS Virgin</button>
     </div>
 
     <div id="blocs-accueil"></div>
@@ -74,7 +94,7 @@
 
   <!-- Clients -->
   <section id="ecran-clients" hidden>
-    <input id="recherche-clients" class="recherche" type="search" placeholder="🔍 Chercher un nom, un numéro…">
+    <input id="recherche-clients" class="recherche" type="search" placeholder="Chercher un nom, un numéro…">
     <div class="filtres" id="filtres-clients">
       <button data-filtre="rappels" data-nom="À rappeler" class="actif">À rappeler</button>
       <button data-filtre="vendu" data-nom="Vendus">Vendus</button>
@@ -82,14 +102,13 @@
       <button data-filtre="tous" data-nom="Tous">Tous</button>
     </div>
     <ul id="liste-clients" class="liste"></ul>
-    <p id="vide-clients" class="vide" hidden>Aucun client ici.</p>
-    <button class="flottant" data-ajouter="client" aria-label="Ajouter un client">+</button>
+    <div id="vide-clients" class="vide" hidden><span>👥</span>Aucun client ici.</div>
   </section>
 
 
   <!-- BRS -->
   <section id="ecran-brs" hidden>
-    <input id="recherche-brs" class="recherche" type="search" placeholder="🔍 Chercher un nom, un numéro, une commande…">
+    <input id="recherche-brs" class="recherche" type="search" placeholder="Chercher un nom, un numéro, une commande…">
     <div class="filtres" id="filtres-brs">
       <button data-filtre="a_venir" data-nom="À venir" class="actif">À venir</button>
       <button data-filtre="a_rappeler" data-nom="À rappeler">À rappeler</button>
@@ -98,65 +117,70 @@
       <button data-filtre="tous" data-nom="Tous">Tous</button>
     </div>
     <ul id="liste-brs" class="liste"></ul>
-    <p id="vide-brs" class="vide" hidden>Aucun BRS ici.</p>
-    <button class="flottant" data-ajouter="brs" aria-label="Ajouter un BRS">+</button>
+    <div id="vide-brs" class="vide" hidden><span>🔧</span>Aucun BRS ici.</div>
   </section>
 
 
   <!-- Fiche client -->
   <section id="ecran-fiche-client" hidden>
-    <form id="form-client" class="carte fiche" data-table="clients">
-      <h2 class="titre-fiche">Nouveau client</h2>
-
-      <label>Nom du client
-        <input name="nom" required autocomplete="off">
-      </label>
-
-      <label>Téléphone
-        <input name="telephone" type="tel" inputmode="tel" autocomplete="off">
-      </label>
-      <div class="contacts" hidden>
-        <a class="bouton appeler">📞 Appeler</a>
-        <a class="bouton texto">💬 Texto</a>
+    <form id="form-client" class="fiche" data-table="clients">
+      <div class="fiche-haut">
+        <button type="button" class="retour annuler">‹ Retour</button>
+        <h2 class="titre-fiche">Nouveau client</h2>
       </div>
 
-      <div class="champ">
-        <span class="etiquette">Statut</span>
+      <div class="groupe">
+        <p class="groupe-titre">Client</p>
+        <label>Nom
+          <input name="nom" required autocomplete="off" placeholder="Prénom et nom">
+        </label>
+        <label>Téléphone
+          <input name="telephone" type="tel" inputmode="tel" autocomplete="off" placeholder="514-555-1234">
+        </label>
+        <div class="contacts" hidden>
+          <a class="bouton appeler">📞 Appeler</a>
+          <a class="bouton texto">💬 Texto</a>
+        </div>
+      </div>
+
+      <div class="groupe">
+        <p class="groupe-titre">Suivi</p>
         <input type="hidden" name="statut">
-        <div class="choix" data-champ="statut">
-          <button type="button" data-valeur="a_rappeler">📞 À rappeler</button>
-          <button type="button" data-valeur="vendu">✅ Vendu</button>
-          <button type="button" data-valeur="pas_interesse">✋ Pas intéressé</button>
+        <div class="choix grille-3" data-champ="statut">
+          <button type="button" data-valeur="a_rappeler"><span>📞</span>À rappeler</button>
+          <button type="button" data-valeur="vendu"><span>✅</span>Vendu</button>
+          <button type="button" data-valeur="pas_interesse"><span>✋</span>Pas intéressé</button>
+        </div>
+
+        <div class="champ champ-rappel">
+          <label>Quand le rappeler
+            <input name="rappel" type="date">
+          </label>
+          <div class="dates-rapides" data-champ="rappel">
+            <button type="button" data-jours="0">Aujourd'hui</button>
+            <button type="button" data-jours="1">Demain</button>
+            <button type="button" data-jours="3">3 jours</button>
+            <button type="button" data-jours="7">1 semaine</button>
+            <button type="button" data-jours="30">1 mois</button>
+          </div>
         </div>
       </div>
 
-      <div class="champ champ-rappel">
-        <label>Quand le rappeler / quand il revient
-          <input name="rappel" type="date">
+      <div class="groupe">
+        <p class="groupe-titre">Détails</p>
+        <label>Ce qu'on lui a proposé
+          <textarea name="offre" rows="2" placeholder="Ex. Internet + Télé, mobile 2 lignes…"></textarea>
         </label>
-        <div class="dates-rapides" data-champ="rappel">
-          <button type="button" data-jours="0">Aujourd'hui</button>
-          <button type="button" data-jours="1">Demain</button>
-          <button type="button" data-jours="3">3 jours</button>
-          <button type="button" data-jours="7">1 semaine</button>
-          <button type="button" data-jours="30">1 mois</button>
+        <label>Notes
+          <textarea name="notes" rows="3" placeholder="Ex. attend la fin de son contrat en mars"></textarea>
+        </label>
+        <div class="photo">
+          <img class="apercu" alt="Photo" hidden>
+          <label class="bouton bouton-photo">📷 Ajouter une photo
+            <input class="input-photo" type="file" accept="image/*" hidden>
+          </label>
+          <button type="button" class="lien danger retirer-photo" hidden>Retirer la photo</button>
         </div>
-      </div>
-
-      <label>Ce qu'on lui a proposé
-        <textarea name="offre" rows="2" placeholder="Ex. Internet + Télé, forfait mobile 2 lignes…"></textarea>
-      </label>
-
-      <label>Notes
-        <textarea name="notes" rows="3" placeholder="Ex. attend la fin de son contrat en mars"></textarea>
-      </label>
-
-      <div class="photo">
-        <img class="apercu" alt="Photo" hidden>
-        <label class="bouton">📷 Prendre / choisir une photo
-          <input class="input-photo" type="file" accept="image/*" hidden>
-        </label>
-        <button type="button" class="lien retirer-photo" hidden>Retirer la photo</button>
       </div>
 
       <p class="petit info"></p>
@@ -164,8 +188,7 @@
       <p class="message"></p>
 
       <div class="actions">
-        <button type="button" class="annuler">Annuler</button>
-        <button type="submit" class="principal">Enregistrer</button>
+        <button type="submit" class="principal gros">Enregistrer</button>
       </div>
     </form>
   </section>
@@ -173,50 +196,48 @@
 
   <!-- Fiche BRS -->
   <section id="ecran-fiche-brs" hidden>
-    <form id="form-brs" class="carte fiche" data-table="brs">
-      <h2 class="titre-fiche">Nouveau BRS</h2>
+    <form id="form-brs" class="fiche" data-table="brs">
+      <div class="fiche-haut">
+        <button type="button" class="retour annuler">‹ Retour</button>
+        <h2 class="titre-fiche">Nouveau BRS</h2>
+      </div>
 
-      <div class="champ">
-        <span class="etiquette">Compagnie</span>
-        <input type="hidden" name="marque">
-        <div class="choix marques" data-champ="marque">
-          <button type="button" data-valeur="Bell" class="bell">Bell</button>
-          <button type="button" data-valeur="Virgin" class="virgin">Virgin Plus</button>
+      <input type="hidden" name="marque">
+      <div class="choix marques" data-champ="marque">
+        <button type="button" data-valeur="Bell" class="bell">Bell</button>
+        <button type="button" data-valeur="Virgin" class="virgin">Virgin Plus</button>
+      </div>
+
+      <div class="groupe">
+        <p class="groupe-titre">Client</p>
+        <label>Nom
+          <input name="nom" required autocomplete="off" placeholder="Prénom et nom">
+        </label>
+        <label>Téléphone
+          <input name="telephone" type="tel" inputmode="tel" autocomplete="off" placeholder="514-555-1234">
+        </label>
+        <div class="contacts" hidden>
+          <a class="bouton appeler">📞 Appeler</a>
+          <a class="bouton texto">💬 Texto</a>
         </div>
+        <label>Numéro de commande
+          <input name="commande" autocomplete="off">
+        </label>
+        <label>Adresse
+          <input name="adresse" autocomplete="off" placeholder="Optionnel">
+        </label>
       </div>
 
-      <label>Nom du client
-        <input name="nom" required autocomplete="off">
-      </label>
-
-      <label>Téléphone
-        <input name="telephone" type="tel" inputmode="tel" autocomplete="off">
-      </label>
-      <div class="contacts" hidden>
-        <a class="bouton appeler">📞 Appeler</a>
-        <a class="bouton texto">💬 Texto</a>
-      </div>
-
-      <label>Numéro de commande
-        <input name="commande" autocomplete="off" inputmode="text">
-      </label>
-
-      <label>Adresse
-        <input name="adresse" autocomplete="off" placeholder="Optionnel">
-      </label>
-
-      <div class="champ">
-        <span class="etiquette">Services</span>
+      <div class="groupe">
+        <p class="groupe-titre">Installation</p>
         <input type="hidden" name="services">
-        <div class="choix" data-champ="services" data-multiple="1">
-          <button type="button" data-valeur="Internet">🌐 Internet</button>
-          <button type="button" data-valeur="Télé">📺 Télé</button>
-          <button type="button" data-valeur="Téléphone maison">☎️ Téléphone maison</button>
-          <button type="button" data-valeur="Maison intelligente">🏠 Maison intelligente</button>
+        <div class="choix grille-2" data-champ="services" data-multiple="1">
+          <button type="button" data-valeur="Internet"><span>🌐</span>Internet</button>
+          <button type="button" data-valeur="Télé"><span>📺</span>Télé</button>
+          <button type="button" data-valeur="Téléphone maison"><span>☎️</span>Téléphone</button>
+          <button type="button" data-valeur="Maison intelligente"><span>🏠</span>Maison intel.</button>
         </div>
-      </div>
 
-      <div class="champ">
         <label>Date d'installation
           <input name="date_install" type="date">
         </label>
@@ -228,36 +249,38 @@
         </div>
       </div>
 
-      <div class="champ">
-        <span class="etiquette">Statut</span>
+      <div class="groupe">
+        <p class="groupe-titre">Suivi</p>
         <input type="hidden" name="statut">
-        <div class="choix" data-champ="statut">
-          <button type="button" data-valeur="en_attente">⏳ En attente</button>
-          <button type="button" data-valeur="installe">🔧 Installé</button>
-          <button type="button" data-valeur="probleme">⚠️ Problème</button>
-          <button type="button" data-valeur="complete">✅ Tout est bon</button>
+        <div class="choix grille-2" data-champ="statut">
+          <button type="button" data-valeur="en_attente"><span>⏳</span>En attente</button>
+          <button type="button" data-valeur="installe"><span>🔧</span>Installé</button>
+          <button type="button" data-valeur="probleme"><span>⚠️</span>Problème</button>
+          <button type="button" data-valeur="complete"><span>✅</span>Tout est bon</button>
         </div>
+
+        <label class="interrupteur">
+          <span>Client rappelé après l'installation</span>
+          <input type="checkbox" name="rappele">
+        </label>
+
+        <label class="champ-probleme" hidden>C'est quoi le problème?
+          <textarea name="probleme" rows="2" placeholder="Ex. technicien pas venu, modem ne marche pas…"></textarea>
+        </label>
       </div>
 
-      <label class="interrupteur">
-        <input type="checkbox" name="rappele">
-        <span>Client rappelé après l'installation</span>
-      </label>
-
-      <label class="champ-probleme" hidden>C'est quoi le problème?
-        <textarea name="probleme" rows="2" placeholder="Ex. technicien pas venu, modem ne marche pas…"></textarea>
-      </label>
-
-      <label>Notes
-        <textarea name="notes" rows="2"></textarea>
-      </label>
-
-      <div class="photo">
-        <img class="apercu" alt="Photo" hidden>
-        <label class="bouton">📷 Photo de la commande
-          <input class="input-photo" type="file" accept="image/*" hidden>
+      <div class="groupe">
+        <p class="groupe-titre">Notes et photo</p>
+        <label>Notes
+          <textarea name="notes" rows="2"></textarea>
         </label>
-        <button type="button" class="lien retirer-photo" hidden>Retirer la photo</button>
+        <div class="photo">
+          <img class="apercu" alt="Photo" hidden>
+          <label class="bouton bouton-photo">📷 Photo de la commande
+            <input class="input-photo" type="file" accept="image/*" hidden>
+          </label>
+          <button type="button" class="lien danger retirer-photo" hidden>Retirer la photo</button>
+        </div>
       </div>
 
       <p class="petit info"></p>
@@ -265,12 +288,33 @@
       <p class="message"></p>
 
       <div class="actions">
-        <button type="button" class="annuler">Annuler</button>
-        <button type="submit" class="principal">Enregistrer</button>
+        <button type="submit" class="principal gros">Enregistrer</button>
       </div>
     </form>
   </section>
 
+
+  <button id="btn-plus" class="flottant" aria-label="Ajouter" hidden>+</button>
+
+  <div id="feuille" class="feuille" hidden>
+    <div class="feuille-fond"></div>
+    <div class="feuille-boite">
+      <p class="feuille-titre">Ajouter</p>
+      <button data-ajouter="client" class="option">
+        <span class="rond-icone client">👤</span>
+        <span><b>Suivi client</b><small>Quelqu'un à rappeler, une vente</small></span>
+      </button>
+      <button data-ajouter="brs-bell" class="option">
+        <span class="rond-icone bell">B</span>
+        <span><b>BRS Bell</b><small>Installation résidentielle Bell</small></span>
+      </button>
+      <button data-ajouter="brs-virgin" class="option">
+        <span class="rond-icone virgin">V</span>
+        <span><b>BRS Virgin Plus</b><small>Installation résidentielle Virgin</small></span>
+      </button>
+      <button class="fermer-feuille">Annuler</button>
+    </div>
+  </div>
 
   <nav id="nav" hidden>
     <button data-ecran="accueil"><span class="icone">🏠</span>Aujourd'hui<span id="pastille" class="pastille" hidden></span></button>
@@ -281,7 +325,7 @@
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-  <script src="config.js?v=3"></script>
-  <script src="app.js?v=3"></script>
+  <script src="config.js?v=5"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
