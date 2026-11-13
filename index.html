@@ -12,17 +12,10 @@
 </head>
 <body>
 
-  <div class="haut">
   <header>
     <h1>Espace Équipe</h1>
     <button id="btn-deconnexion" class="lien" hidden>Déconnexion</button>
   </header>
-
-  <nav id="menu" hidden>
-    <button data-ecran="liste" class="actif">Clients</button>
-    <button data-ecran="forfaits">Forfaits Internet</button>
-  </nav>
-  </div>
 
   <section id="ecran-connexion" hidden>
     <form id="form-connexion" class="carte">
@@ -45,6 +38,8 @@
   <section id="ecran-liste" hidden>
     <p id="bandeau-essai" class="bandeau" hidden>Mode essai : les données restent seulement sur cet appareil.</p>
 
+    <h2 class="titre-section">Suivis clients</h2>
+
     <div class="resume">
       <div><strong id="nb-retard">0</strong><span>en retard</span></div>
       <div><strong id="nb-aujourdhui">0</strong><span>aujourd'hui</span></div>
@@ -65,42 +60,6 @@
     <button id="btn-ajouter" class="flottant" aria-label="Ajouter un client">+</button>
   </section>
 
-  <section id="ecran-forfaits" hidden>
-    <div id="choix-zone" class="zones"></div>
-    <ul id="liste-forfaits"></ul>
-    <p id="forfaits-vide" class="vide" hidden>Aucun forfait pour l'instant. Touche « Modifier les forfaits » pour en ajouter.</p>
-    <button id="btn-ajouter-forfait" class="principal plein" hidden>+ Ajouter un forfait</button>
-    <button id="btn-modifier-forfaits" class="lien plein">✏️ Modifier les forfaits</button>
-  </section>
-
-  <section id="ecran-forfait" hidden>
-    <form id="form-forfait" class="carte">
-      <h2 id="titre-forfait">Nouveau forfait</h2>
-      <label>Zone
-        <input name="zone" list="zones-existantes" required placeholder="Ex. Zone 1">
-        <datalist id="zones-existantes"></datalist>
-      </label>
-      <label>Nom du forfait
-        <input name="nom" required placeholder="Ex. Gigabit Fibe 1.5">
-      </label>
-      <label>Vitesse
-        <input name="vitesse" placeholder="Ex. 1,5 Gbit/s">
-      </label>
-      <label>Prix
-        <input name="prix" placeholder="Ex. 95 $/mois">
-      </label>
-      <label>Pour qui / note
-        <input name="note" placeholder="Ex. Famille, télétravail">
-      </label>
-      <div class="actions">
-        <button type="button" id="btn-annuler-forfait">Annuler</button>
-        <button type="submit" class="principal">Enregistrer</button>
-      </div>
-      <button type="button" id="btn-supprimer-forfait" class="lien danger" hidden>Supprimer ce forfait</button>
-      <p id="msg-forfait" class="message"></p>
-    </form>
-  </section>
-
   <section id="ecran-fiche" hidden>
     <form id="form-fiche" class="carte">
       <h2 id="titre-fiche">Nouveau client</h2>
@@ -111,11 +70,6 @@
       <label>Téléphone
         <input name="telephone" type="tel" inputmode="tel">
       </label>
-      <label>Zone Internet
-        <select name="zone" id="select-zone">
-        </select>
-      </label>
-      <div id="propositions" class="puces"></div>
       <label>Ce qu'on a proposé
         <textarea name="offre" rows="2" placeholder="Ex. Internet Gigabit + Télé Fibe"></textarea>
       </label>
