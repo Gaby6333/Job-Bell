@@ -576,6 +576,8 @@ function afficherAccueil() {
   else if (urgent === 1) $("hero-resume").textContent = "Tu as 1 chose à faire aujourd'hui."
   else $("hero-resume").textContent = "Tu as " + urgent + " choses à faire aujourd'hui."
 
+  majCarteNotifs()
+
   $("pastille").textContent = urgent
   $("pastille").hidden = urgent === 0
 }
@@ -860,6 +862,19 @@ document.querySelectorAll("form.fiche").forEach(function (form) {
 
   form.querySelector(".annuler").onclick = () => montrer(ecranActuel)
 
+  form.querySelector(".bouton-calendrier").onclick = function () {
+    const nom = form.elements.nom.value.trim() || "Client"
+    const tel = form.elements.telephone.value.trim()
+    if (form.dataset.table === "brs") {
+      const marque = form.elements.marque.value === "Virgin" ? "Virgin Plus" : "Bell"
+      const details = ["Tél. : " + tel, "Commande : " + form.elements.commande.value, "Services : " + form.elements.services.value]
+      ajouterCalendrier("🔧 Installation " + marque + " – " + nom, form.elements.date_install.value, details.join("\n"), form.elements.adresse.value)
+    } else {
+      const details = ["Tél. : " + tel, "Proposé : " + form.elements.offre.value]
+      ajouterCalendrier("📞 Rappeler " + nom, form.elements.rappel.value, details.join("\n"), "")
+    }
+  }
+
   form.querySelector(".supprimer").onclick = async function () {
     if (!confirm("Supprimer pour de bon?")) return
     const erreur = await supprimer(form.dataset.table, ficheId)
@@ -872,5 +887,143 @@ document.querySelectorAll("form.fiche").forEach(function (form) {
     await rafraichir()
   }
 })
+
+
+// ---------- Calendrier ----------
+
+function echapper(texte) {
+  return (texte || "").replace(/\\/g, "\\\\").replace(/([,;])/g, "\\$1").replace(/\n/g, "\\n")
+}
+
+function ajouterCalendrier(titre, date, details, adresse) {
+  if (!date) {
+    toast("Choisis une date d'abord")
+    return
+  }
+  const lignes = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Espace Equipe//FR",
+    "BEGIN:VEVENT",
+    "UID:" + Date.now() + "@espace-equipe",
+    "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z",
+    "DTSTART;VALUE=DATE:" + date.replace(/-/g, ""),
+    "SUMMARY:" + echapper(titre),
+    "DESCRIPTION:" + echapper(details),
+    "LOCATION:" + echapper(adresse),
+    "BEGIN:VALARM",
+    "TRIGGER:PT9H",
+    "ACTION:DISPLAY",
+    "DESCRIPTION:" + echapper(titre),
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ]
+  const fichier = new Blob([lignes.join("\r\n")], { type: "text/calendar" })
+  window.location.href = URL.createObjectURL(fichier)
+}
+
+
+// ---------- Notifications ----------
+
+const notifsPossibles = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window
+const estIphone = /iPhone|iPad|iPod/.test(navigator.userAgent)
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {})
+}
+
+function estInstallee() {
+  return window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true
+}
+
+function cleVapid(texte) {
+  const base64 = (texte + "=".repeat((4 - texte.length % 4) % 4)).replace(/-/g, "+").replace(/_/g, "/")
+  const brut = atob(base64)
+  return Uint8Array.from(brut, c => c.charCodeAt(0))
+}
+
+function carteNotifs(titre, texte, bouton) {
+  $("carte-notifs").hidden = false
+  $("notifs-titre").textContent = titre
+  $("notifs-texte").textContent = texte
+  $("btn-notifs").hidden = !bouton
+  $("btn-notifs").textContent = bouton || ""
+}
+
+async function majCarteNotifs() {
+  $("carte-notifs").hidden = true
+  if (modeEssai || typeof VAPID_PUBLIC === "undefined") return
+
+  if (estIphone && !estInstallee()) {
+    carteNotifs("Reçois ton résumé chaque matin", "Installe l'app d'abord : Partager → Sur l'écran d'accueil.", "")
+    return
+  }
+  if (!notifsPossibles) return
+
+  if (Notification.permission === "denied") {
+    carteNotifs("Notifications bloquées", "Réglages du téléphone → Notifications → Équipe.", "")
+    return
+  }
+
+  if (Notification.permission === "granted") {
+    const inscription = await navigator.serviceWorker.ready
+    const abonnement = await inscription.pushManager.getSubscription()
+    if (abonnement) {
+      carteNotifs("Notifications activées", "Résumé de ta journée chaque matin à 8 h.", "Tester")
+      return
+    }
+  }
+
+  carteNotifs("Résumé chaque matin à 8 h", "Une notification avec tes rappels et installations du jour.", "Activer")
+}
+
+$("btn-notifs").onclick = async function () {
+  const bouton = $("btn-notifs")
+  bouton.disabled = true
+  if (bouton.textContent === "Tester") await testerNotifs()
+  else await activerNotifs()
+  bouton.disabled = false
+}
+
+async function activerNotifs() {
+  const permission = await Notification.requestPermission()
+  if (permission !== "granted") {
+    majCarteNotifs()
+    return
+  }
+
+  try {
+    const inscription = await navigator.serviceWorker.ready
+    let abonnement = await inscription.pushManager.getSubscription()
+    if (!abonnement) {
+      abonnement = await inscription.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: cleVapid(VAPID_PUBLIC)
+      })
+    }
+    const infos = abonnement.toJSON()
+    const reponse = await db.from("abonnements").upsert({
+      endpoint: infos.endpoint,
+      user_id: user.id,
+      p256dh: infos.keys.p256dh,
+      auth: infos.keys.auth
+    })
+    if (reponse.error) throw reponse.error
+    toast("Notifications activées 🔔")
+  } catch (erreur) {
+    alert("Impossible d'activer les notifications : " + erreur.message)
+  }
+  majCarteNotifs()
+}
+
+async function testerNotifs() {
+  const reponse = await db.functions.invoke("resume-matin", { body: { test: true } })
+  if (reponse.error) {
+    alert("Le test n'a pas marché : " + reponse.error.message)
+    return
+  }
+  toast("Notification envoyée, regarde ton téléphone")
+}
 
 demarrer()

@@ -8,6 +8,8 @@ App de l'équipe pour suivre les clients et les services résidentiels (BRS) Bel
 - Boutons Appeler / Texto partout, photo de la commande, recherche
 - Voir toute l'équipe ou seulement les miens
 - S'installe sur l'écran d'accueil du téléphone comme une app
+- Notification chaque matin à 8 h avec le résumé de la journée (fonction `supabase/functions/resume-matin`)
+- Bouton 📅 pour ajouter un rappel ou une installation au calendrier du téléphone
 
 ## Essayer tout de suite
 

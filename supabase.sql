@@ -53,3 +53,32 @@ create policy "voir" on brs for select to authenticated using (true);
 create policy "ajouter" on brs for insert to authenticated with check (auth.uid() = user_id);
 create policy "modifier" on brs for update to authenticated using (true);
 create policy "supprimer" on brs for delete to authenticated using (auth.uid() = user_id);
+
+-- ---------- Notifications (résumé du matin) ----------
+
+create table if not exists abonnements (
+  endpoint text primary key,
+  user_id uuid default auth.uid() references auth.users on delete cascade,
+  p256dh text not null,
+  auth text not null,
+  created_at timestamptz default now()
+);
+
+alter table abonnements enable row level security;
+drop policy if exists "mes appareils" on abonnements;
+create policy "mes appareils" on abonnements for all to authenticated
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+grant select, insert, update, delete on abonnements to authenticated;
+
+-- Appelle la fonction resume-matin chaque heure (elle envoie seulement à 8 h, heure de Montréal).
+-- Remplace CLE_CRON par la même valeur que le secret CLE_CRON de la fonction.
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+select cron.schedule('resume-matin', '0 * * * *', $$
+  select net.http_post(
+    url := 'https://glvalhrynzfdaasherja.supabase.co/functions/v1/resume-matin',
+    headers := '{"Content-Type": "application/json", "x-cle": "CLE_CRON"}'::jsonb,
+    body := '{}'::jsonb
+  )
+$$);
