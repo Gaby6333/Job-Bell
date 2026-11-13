@@ -766,3 +766,42 @@ nav button.actif .icone { filter: none; opacity: 1; transform: scale(1.08); }
   font-size: 15px;
   padding: 11px;
 }
+
+
+/* ---------- Saisie rapide ---------- */
+
+.raccourcis.deux { grid-template-columns: 1fr 1fr; }
+.rond-icone.brs { background: var(--orange-pale); }
+
+.grille-4 { display: grid; grid-template-columns: repeat(4, 1fr); }
+.grille-4 button {
+  padding: 12px 0;
+  font-size: 18px;
+  font-weight: 800;
+  background: var(--champ);
+  border: 2px solid transparent;
+}
+.produits button b { font-size: 16px; }
+.produits button small { font-size: 12px; color: var(--gris); font-weight: 500; }
+.produits button.actif small { color: var(--lien); }
+.sous-titre { margin: 2px 0 -4px; font-size: 13px; font-weight: 600; color: var(--gris); }
+
+.plus summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  background: var(--carte);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre);
+  font-weight: 700;
+  color: var(--lien);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.plus summary::-webkit-details-marker { display: none; }
+.plus summary::before { content: "+"; font-size: 20px; line-height: 1; }
+.plus[open] summary::before { content: "–"; }
+.plus summary small { color: var(--gris); font-weight: 500; }
+.plus[open] summary { border-radius: var(--rayon) var(--rayon) 0 0; box-shadow: none; }
+.plus[open] .groupe { border-radius: 0 0 var(--rayon) var(--rayon); padding-top: 4px; }

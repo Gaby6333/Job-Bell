@@ -12,7 +12,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Équipe">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
@@ -88,10 +88,9 @@
       </div>
     </div>
 
-    <div class="raccourcis">
+    <div class="raccourcis deux">
       <button data-ajouter="client"><span class="rond-icone client">👤</span>Client</button>
-      <button data-ajouter="brs-bell"><span class="rond-icone bell">B</span>BRS Bell</button>
-      <button data-ajouter="brs-virgin"><span class="rond-icone virgin">V</span>BRS Virgin</button>
+      <button data-ajouter="brs"><span class="rond-icone brs">🔧</span>BRS</button>
     </div>
 
     <div id="blocs-accueil"></div>
@@ -136,8 +135,7 @@
       </div>
 
       <div class="groupe">
-        <p class="groupe-titre">Client</p>
-        <label>Nom
+        <label>Nom du client
           <input name="nom" required autocomplete="off" placeholder="Prénom et nom">
         </label>
         <label>Téléphone
@@ -146,6 +144,23 @@
         <div class="contacts" hidden>
           <a class="bouton appeler">📞 Appeler</a>
           <a class="bouton texto">💬 Texto</a>
+        </div>
+      </div>
+
+      <div class="groupe">
+        <p class="groupe-titre">Ce qu'on lui a proposé</p>
+        <input type="hidden" name="offre">
+        <div class="choix grille-3 produits" data-champ="offre" data-multiple="1">
+          <button type="button" data-valeur="AVPA"><b>AVPA</b><small>Son appareil</small></button>
+          <button type="button" data-valeur="Post 24 mois"><b>Post</b><small>24 mois</small></button>
+          <button type="button" data-valeur="Cross-sell"><b>Cross-sell</b><small>Autre service</small></button>
+        </div>
+        <p class="sous-titre">Add-line</p>
+        <div class="choix grille-4" data-champ="offre" data-multiple="1" data-exclusif="1">
+          <button type="button" data-valeur="Add-line 1">1</button>
+          <button type="button" data-valeur="Add-line 2">2</button>
+          <button type="button" data-valeur="Add-line 3">3</button>
+          <button type="button" data-valeur="Add-line 4+">4+</button>
         </div>
       </div>
 
@@ -159,9 +174,6 @@
         </div>
 
         <div class="champ champ-rappel">
-          <label>Quand le rappeler
-            <input name="rappel" type="date">
-          </label>
           <div class="dates-rapides" data-champ="rappel">
             <button type="button" data-jours="0">Aujourd'hui</button>
             <button type="button" data-jours="1">Demain</button>
@@ -169,26 +181,28 @@
             <button type="button" data-jours="7">1 semaine</button>
             <button type="button" data-jours="30">1 mois</button>
           </div>
+          <label>Date du rappel
+            <input name="rappel" type="date">
+          </label>
           <button type="button" class="bouton-calendrier">📅 Ajouter au calendrier</button>
         </div>
       </div>
 
-      <div class="groupe">
-        <p class="groupe-titre">Détails</p>
-        <label>Ce qu'on lui a proposé
-          <textarea name="offre" rows="2" placeholder="Ex. Internet + Télé, mobile 2 lignes…"></textarea>
-        </label>
-        <label>Notes
-          <textarea name="notes" rows="3" placeholder="Ex. attend la fin de son contrat en mars"></textarea>
-        </label>
-        <div class="photo">
-          <img class="apercu" alt="Photo" hidden>
-          <label class="bouton bouton-photo">📷 Ajouter une photo
-            <input class="input-photo" type="file" accept="image/*" hidden>
+      <details class="plus">
+        <summary>Plus de détails <small>notes, photo</small></summary>
+        <div class="groupe">
+          <label>Notes
+            <textarea name="notes" rows="3" placeholder="Ex. attend la fin de son contrat en mars"></textarea>
           </label>
-          <button type="button" class="lien danger retirer-photo" hidden>Retirer la photo</button>
+          <div class="photo">
+            <img class="apercu" alt="Photo" hidden>
+            <label class="bouton bouton-photo">📷 Ajouter une photo
+              <input class="input-photo" type="file" accept="image/*" hidden>
+            </label>
+            <button type="button" class="lien danger retirer-photo" hidden>Retirer la photo</button>
+          </div>
         </div>
-      </div>
+      </details>
 
       <p class="petit info"></p>
       <button type="button" class="lien danger supprimer" hidden>Supprimer ce client</button>
@@ -229,9 +243,6 @@
         </div>
         <label>Numéro de commande
           <input name="commande" autocomplete="off">
-        </label>
-        <label>Adresse
-          <input name="adresse" autocomplete="off" placeholder="Optionnel">
         </label>
       </div>
 
@@ -277,19 +288,24 @@
         </label>
       </div>
 
-      <div class="groupe">
-        <p class="groupe-titre">Notes et photo</p>
-        <label>Notes
-          <textarea name="notes" rows="2"></textarea>
-        </label>
-        <div class="photo">
-          <img class="apercu" alt="Photo" hidden>
-          <label class="bouton bouton-photo">📷 Photo de la commande
-            <input class="input-photo" type="file" accept="image/*" hidden>
+      <details class="plus">
+        <summary>Plus de détails <small>adresse, notes, photo</small></summary>
+        <div class="groupe">
+          <label>Adresse
+            <input name="adresse" autocomplete="off">
           </label>
-          <button type="button" class="lien danger retirer-photo" hidden>Retirer la photo</button>
+          <label>Notes
+            <textarea name="notes" rows="2"></textarea>
+          </label>
+          <div class="photo">
+            <img class="apercu" alt="Photo" hidden>
+            <label class="bouton bouton-photo">📷 Photo de la commande
+              <input class="input-photo" type="file" accept="image/*" hidden>
+            </label>
+            <button type="button" class="lien danger retirer-photo" hidden>Retirer la photo</button>
+          </div>
         </div>
-      </div>
+      </details>
 
       <p class="petit info"></p>
       <button type="button" class="lien danger supprimer" hidden>Supprimer ce BRS</button>
@@ -310,15 +326,11 @@
       <p class="feuille-titre">Ajouter</p>
       <button data-ajouter="client" class="option">
         <span class="rond-icone client">👤</span>
-        <span><b>Suivi client</b><small>Quelqu'un à rappeler, une vente</small></span>
+        <span><b>Suivi client</b><small>AVPA, Post, add-line, cross-sell…</small></span>
       </button>
-      <button data-ajouter="brs-bell" class="option">
-        <span class="rond-icone bell">B</span>
-        <span><b>BRS Bell</b><small>Installation résidentielle Bell</small></span>
-      </button>
-      <button data-ajouter="brs-virgin" class="option">
-        <span class="rond-icone virgin">V</span>
-        <span><b>BRS Virgin Plus</b><small>Installation résidentielle Virgin</small></span>
+      <button data-ajouter="brs" class="option">
+        <span class="rond-icone brs">🔧</span>
+        <span><b>BRS</b><small>Installation Bell ou Virgin Plus</small></span>
       </button>
       <button class="fermer-feuille">Annuler</button>
     </div>
@@ -333,7 +345,7 @@
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-  <script src="config.js?v=7"></script>
-  <script src="app.js?v=7"></script>
+  <script src="config.js?v=8"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

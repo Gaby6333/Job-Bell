@@ -164,8 +164,7 @@ document.querySelectorAll("#barre-portee button").forEach(function (bouton) {
 document.querySelectorAll("[data-ajouter]").forEach(function (bouton) {
   bouton.onclick = function () {
     $("feuille").hidden = true
-    if (bouton.dataset.ajouter === "brs-bell") ouvrirBrs(null, "Bell")
-    else if (bouton.dataset.ajouter === "brs-virgin") ouvrirBrs(null, "Virgin")
+    if (bouton.dataset.ajouter === "brs") ouvrirBrs(null)
     else ouvrirClient(null)
   }
 })
@@ -701,6 +700,7 @@ function preparerFiche(form, element, titre) {
   afficherPhoto(form)
   majChoix(form)
   majContacts(form)
+  form.querySelector("details.plus").open = !!(form.elements.notes.value || form.elements.adresse && form.elements.adresse.value)
 }
 
 async function ouvrirClient(c) {
@@ -713,18 +713,20 @@ async function ouvrirClient(c) {
   if (c) {
     photo = await chargerPhoto("clients", c.id)
     afficherPhoto(form)
+    if (photo) form.querySelector("details.plus").open = true
   }
 }
 
-async function ouvrirBrs(b, marque) {
+async function ouvrirBrs(b) {
   const form = $("form-brs")
   ficheId = b ? b.id : null
-  remplir(form, b || { marque: marque || "Bell", statut: "en_attente" }, CHAMPS_BRS)
+  remplir(form, b || { statut: "en_attente" }, CHAMPS_BRS)
   preparerFiche(form, b, b ? b.nom : "Nouveau BRS")
   montrer("fiche-brs")
   if (b) {
     photo = await chargerPhoto("brs", b.id)
     afficherPhoto(form)
+    if (photo) form.querySelector("details.plus").open = true
   }
 }
 
@@ -806,6 +808,11 @@ $("form-client").onsubmit = function (e) {
 
 $("form-brs").onsubmit = function (e) {
   e.preventDefault()
+  if (!e.target.elements.marque.value) {
+    e.target.querySelector(".message").textContent = "Choisis Bell ou Virgin Plus."
+    window.scrollTo(0, 0)
+    return
+  }
   enregistrer(e.target, CHAMPS_BRS)
 }
 
@@ -820,11 +827,16 @@ document.querySelectorAll("form.fiche").forEach(function (form) {
         if (valeurs.includes(bouton.dataset.valeur)) {
           valeurs = valeurs.filter(v => v !== bouton.dataset.valeur)
         } else {
+          if (div.dataset.exclusif) {
+            const autres = Array.from(div.querySelectorAll("button")).map(b => b.dataset.valeur)
+            valeurs = valeurs.filter(v => !autres.includes(v))
+          }
           valeurs.push(bouton.dataset.valeur)
         }
         input.value = valeurs.join(", ")
       } else {
         input.value = bouton.dataset.valeur
+        form.querySelector(".message").textContent = ""
         if (div.dataset.champ === "statut" && input.value === "complete" && form.elements.rappele) {
           form.elements.rappele.checked = true
         }
