@@ -259,8 +259,8 @@ async function charger(table, colonnes) {
   }
   const reponse = await db.from(table).select(colonnes)
   if (reponse.error) {
-    if (table === "brs" && reponse.error.message.includes("brs")) {
-      afficherErreur("La section BRS n'est pas encore activée : il faut coller le texte SQL des BRS dans Supabase.")
+    if (table === "brs") {
+      afficherErreur("La section BRS ne se charge pas (" + reponse.error.message + ")")
     } else {
       afficherErreur("Erreur de chargement : " + reponse.error.message)
     }
