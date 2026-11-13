@@ -149,6 +149,20 @@ input, textarea, select {
   width: 100%;
   transition: border-color 0.15s, background 0.15s;
 }
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 50px;
+  text-align: left;
+}
+input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
+input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.6; }
+
+label, .groupe, .champ, .groupe > * { min-width: 0; max-width: 100%; }
+
 input:focus, textarea:focus { outline: none; border-color: var(--lien); background: var(--carte); }
 input::placeholder, textarea::placeholder { color: #a0a6b0; }
 textarea { resize: vertical; }
