@@ -1,16 +1,13 @@
 # Espace Équipe
 
-App de l'équipe. Première section : les suivis clients (BRS, ventes à la maison, etc.), au même endroit pour tout le monde. D'autres outils viendront s'ajouter avec le temps.
+App de l'équipe pour suivre les clients et les services résidentiels (BRS) Bell et Virgin Plus.
 
-- Nom, téléphone, ce qu'on a proposé, notes
-- Statut : à rappeler / vendu / pas intéressé
-- Date de rappel ou de retour, avec les retards en rouge et ceux du jour en orange
-- Photo (prise directement avec le téléphone) attachée au client
-- Tout le monde voit les clients de l'équipe, n'importe qui peut ajouter une note ou une photo
-- Bouton 📞 pour appeler le client directement
+- **Aujourd'hui** : tout ce qu'il y a à faire dans la journée (clients à rappeler, installations à confirmer, clients à rappeler après l'installation, problèmes)
+- **Clients** : nom, téléphone, ce qu'on a proposé, statut, date de rappel en un clic
+- **BRS** : Bell ou Virgin, numéro de commande, services, date d'installation, statut (en attente, installé, problème, tout est bon), rappelé ou non, problème
+- Boutons Appeler / Texto partout, photo de la commande, recherche
+- Voir toute l'équipe ou seulement les miens
 - S'installe sur l'écran d'accueil du téléphone comme une app
-
-Tout est gratuit : l'app est hébergée sur GitHub Pages et les données sont dans Supabase (plan gratuit).
 
 ## Essayer tout de suite
 

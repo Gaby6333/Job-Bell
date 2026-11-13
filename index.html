@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Espace Équipe</title>
   <meta name="theme-color" content="#00549a">
   <link rel="manifest" href="manifest.json">
@@ -16,16 +16,29 @@
 </head>
 <body>
 
-  <header>
-    <h1>Espace Équipe</h1>
-    <button id="btn-deconnexion" class="lien" hidden>Déconnexion</button>
-  </header>
+  <div class="haut">
+    <header>
+      <h1>Espace Équipe</h1>
+      <button id="btn-deconnexion" class="lien" hidden>Déconnexion</button>
+    </header>
+    <div id="barre-portee" class="segment" hidden>
+      <button data-moi="0">👥 Toute l'équipe</button>
+      <button data-moi="1">🙋 Les miens</button>
+    </div>
+  </div>
 
+  <p id="erreur" class="erreur" hidden></p>
+  <p id="bandeau-essai" class="bandeau" hidden>Mode essai : les données restent seulement sur cet appareil.</p>
+
+
+  <!-- Connexion -->
   <section id="ecran-connexion" hidden>
-    <form id="form-connexion" class="carte">
+    <form id="form-connexion" class="carte connexion">
+      <img src="icon.svg" alt="" class="logo">
       <h2 id="titre-connexion">Connexion</h2>
+      <p class="petit">Suivis clients et BRS de l'équipe</p>
       <label id="champ-nom" hidden>Ton nom
-        <input name="nom" autocomplete="name">
+        <input name="nom" autocomplete="name" placeholder="Ex. Gabriel">
       </label>
       <label>Courriel
         <input name="courriel" type="email" required autocomplete="email">
@@ -33,83 +46,239 @@
       <label>Mot de passe
         <input name="motdepasse" type="password" required minlength="6" autocomplete="current-password">
       </label>
-      <button type="submit" class="principal" id="btn-connexion">Se connecter</button>
+      <button type="submit" class="principal gros" id="btn-connexion">Se connecter</button>
       <button type="button" class="lien" id="btn-changer-mode">Pas de compte? Créer un compte</button>
-      <p id="msg-connexion" class="message"></p>
+      <p class="message"></p>
     </form>
   </section>
 
-  <section id="ecran-liste" hidden>
-    <p id="bandeau-essai" class="bandeau" hidden>Mode essai : les données restent seulement sur cet appareil.</p>
 
-    <h2 class="titre-section">Suivis clients</h2>
+  <!-- Aujourd'hui -->
+  <section id="ecran-accueil" hidden>
+    <p id="bonjour" class="bonjour"></p>
 
     <div class="resume">
-      <div><strong id="nb-retard">0</strong><span>en retard</span></div>
-      <div><strong id="nb-aujourdhui">0</strong><span>aujourd'hui</span></div>
-      <div><strong id="nb-vendus">0</strong><span>vendus ce mois</span></div>
+      <div><strong id="stat-ventes" class="vert">0</strong><span>ventes ce mois</span></div>
+      <div><strong id="stat-installs" class="bleu">0</strong><span>installations ce mois</span></div>
+      <div><strong id="stat-problemes" class="rouge">0</strong><span>problèmes BRS</span></div>
     </div>
 
-    <div class="onglets">
-      <button data-filtre="rappels" class="actif">À rappeler</button>
-      <button data-filtre="miens">Mes clients</button>
-      <button data-filtre="tous">Tous</button>
+    <div class="ajouts">
+      <button class="principal gros" data-ajouter="client">+ Client</button>
+      <button class="principal gros" data-ajouter="brs">+ BRS</button>
     </div>
 
-    <input id="recherche" type="search" placeholder="Rechercher un nom, un numéro…">
-
-    <ul id="liste"></ul>
-    <p id="liste-vide" class="vide" hidden>Aucun client ici.</p>
-
-    <button id="btn-ajouter" class="flottant" aria-label="Ajouter un client">+</button>
+    <div id="blocs-accueil"></div>
   </section>
 
-  <section id="ecran-fiche" hidden>
-    <form id="form-fiche" class="carte">
-      <h2 id="titre-fiche">Nouveau client</h2>
+
+  <!-- Clients -->
+  <section id="ecran-clients" hidden>
+    <input id="recherche-clients" class="recherche" type="search" placeholder="🔍 Chercher un nom, un numéro…">
+    <div class="filtres" id="filtres-clients">
+      <button data-filtre="rappels" data-nom="À rappeler" class="actif">À rappeler</button>
+      <button data-filtre="vendu" data-nom="Vendus">Vendus</button>
+      <button data-filtre="pas_interesse" data-nom="Pas intéressés">Pas intéressés</button>
+      <button data-filtre="tous" data-nom="Tous">Tous</button>
+    </div>
+    <ul id="liste-clients" class="liste"></ul>
+    <p id="vide-clients" class="vide" hidden>Aucun client ici.</p>
+    <button class="flottant" data-ajouter="client" aria-label="Ajouter un client">+</button>
+  </section>
+
+
+  <!-- BRS -->
+  <section id="ecran-brs" hidden>
+    <input id="recherche-brs" class="recherche" type="search" placeholder="🔍 Chercher un nom, un numéro, une commande…">
+    <div class="filtres" id="filtres-brs">
+      <button data-filtre="a_venir" data-nom="À venir" class="actif">À venir</button>
+      <button data-filtre="a_rappeler" data-nom="À rappeler">À rappeler</button>
+      <button data-filtre="probleme" data-nom="Problèmes">Problèmes</button>
+      <button data-filtre="complete" data-nom="Terminés">Terminés</button>
+      <button data-filtre="tous" data-nom="Tous">Tous</button>
+    </div>
+    <ul id="liste-brs" class="liste"></ul>
+    <p id="vide-brs" class="vide" hidden>Aucun BRS ici.</p>
+    <button class="flottant" data-ajouter="brs" aria-label="Ajouter un BRS">+</button>
+  </section>
+
+
+  <!-- Fiche client -->
+  <section id="ecran-fiche-client" hidden>
+    <form id="form-client" class="carte fiche" data-table="clients">
+      <h2 class="titre-fiche">Nouveau client</h2>
 
       <label>Nom du client
-        <input name="nom" required>
+        <input name="nom" required autocomplete="off">
       </label>
+
       <label>Téléphone
-        <input name="telephone" type="tel" inputmode="tel">
+        <input name="telephone" type="tel" inputmode="tel" autocomplete="off">
       </label>
-      <label>Ce qu'on a proposé
-        <textarea name="offre" rows="2" placeholder="Ex. Internet Gigabit + Télé Fibe"></textarea>
+      <div class="contacts" hidden>
+        <a class="bouton appeler">📞 Appeler</a>
+        <a class="bouton texto">💬 Texto</a>
+      </div>
+
+      <div class="champ">
+        <span class="etiquette">Statut</span>
+        <input type="hidden" name="statut">
+        <div class="choix" data-champ="statut">
+          <button type="button" data-valeur="a_rappeler">📞 À rappeler</button>
+          <button type="button" data-valeur="vendu">✅ Vendu</button>
+          <button type="button" data-valeur="pas_interesse">✋ Pas intéressé</button>
+        </div>
+      </div>
+
+      <div class="champ champ-rappel">
+        <label>Quand le rappeler / quand il revient
+          <input name="rappel" type="date">
+        </label>
+        <div class="dates-rapides" data-champ="rappel">
+          <button type="button" data-jours="0">Aujourd'hui</button>
+          <button type="button" data-jours="1">Demain</button>
+          <button type="button" data-jours="3">3 jours</button>
+          <button type="button" data-jours="7">1 semaine</button>
+          <button type="button" data-jours="30">1 mois</button>
+        </div>
+      </div>
+
+      <label>Ce qu'on lui a proposé
+        <textarea name="offre" rows="2" placeholder="Ex. Internet + Télé, forfait mobile 2 lignes…"></textarea>
       </label>
+
       <label>Notes
-        <textarea name="notes" rows="3" placeholder="Ex. attend la fin de son contrat Vidéotron en mars"></textarea>
-      </label>
-      <label>Statut
-        <select name="statut">
-          <option value="a_rappeler">À rappeler</option>
-          <option value="vendu">Vendu</option>
-          <option value="pas_interesse">Pas intéressé</option>
-        </select>
-      </label>
-      <label>Date de rappel / retour
-        <input name="rappel" type="date">
+        <textarea name="notes" rows="3" placeholder="Ex. attend la fin de son contrat en mars"></textarea>
       </label>
 
       <div class="photo">
-        <img id="apercu-photo" alt="Photo" hidden>
-        <label class="bouton">
-          📷 Prendre / choisir une photo
-          <input id="input-photo" type="file" accept="image/*" capture="environment" hidden>
+        <img class="apercu" alt="Photo" hidden>
+        <label class="bouton">📷 Prendre / choisir une photo
+          <input class="input-photo" type="file" accept="image/*" hidden>
         </label>
-        <button type="button" id="btn-retirer-photo" class="lien" hidden>Retirer la photo</button>
+        <button type="button" class="lien retirer-photo" hidden>Retirer la photo</button>
       </div>
 
-      <p id="info-vendeur" class="petit"></p>
+      <p class="petit info"></p>
+      <button type="button" class="lien danger supprimer" hidden>Supprimer ce client</button>
+      <p class="message"></p>
 
       <div class="actions">
-        <button type="button" id="btn-annuler">Annuler</button>
+        <button type="button" class="annuler">Annuler</button>
         <button type="submit" class="principal">Enregistrer</button>
       </div>
-      <button type="button" id="btn-supprimer" class="lien danger" hidden>Supprimer ce client</button>
-      <p id="msg-fiche" class="message"></p>
     </form>
   </section>
+
+
+  <!-- Fiche BRS -->
+  <section id="ecran-fiche-brs" hidden>
+    <form id="form-brs" class="carte fiche" data-table="brs">
+      <h2 class="titre-fiche">Nouveau BRS</h2>
+
+      <div class="champ">
+        <span class="etiquette">Compagnie</span>
+        <input type="hidden" name="marque">
+        <div class="choix marques" data-champ="marque">
+          <button type="button" data-valeur="Bell" class="bell">Bell</button>
+          <button type="button" data-valeur="Virgin" class="virgin">Virgin Plus</button>
+        </div>
+      </div>
+
+      <label>Nom du client
+        <input name="nom" required autocomplete="off">
+      </label>
+
+      <label>Téléphone
+        <input name="telephone" type="tel" inputmode="tel" autocomplete="off">
+      </label>
+      <div class="contacts" hidden>
+        <a class="bouton appeler">📞 Appeler</a>
+        <a class="bouton texto">💬 Texto</a>
+      </div>
+
+      <label>Numéro de commande
+        <input name="commande" autocomplete="off" inputmode="text">
+      </label>
+
+      <label>Adresse
+        <input name="adresse" autocomplete="off" placeholder="Optionnel">
+      </label>
+
+      <div class="champ">
+        <span class="etiquette">Services</span>
+        <input type="hidden" name="services">
+        <div class="choix" data-champ="services" data-multiple="1">
+          <button type="button" data-valeur="Internet">🌐 Internet</button>
+          <button type="button" data-valeur="Télé">📺 Télé</button>
+          <button type="button" data-valeur="Téléphone maison">☎️ Téléphone maison</button>
+          <button type="button" data-valeur="Maison intelligente">🏠 Maison intelligente</button>
+        </div>
+      </div>
+
+      <div class="champ">
+        <label>Date d'installation
+          <input name="date_install" type="date">
+        </label>
+        <div class="dates-rapides" data-champ="date_install">
+          <button type="button" data-jours="0">Aujourd'hui</button>
+          <button type="button" data-jours="1">Demain</button>
+          <button type="button" data-jours="2">Dans 2 jours</button>
+          <button type="button" data-jours="7">1 semaine</button>
+        </div>
+      </div>
+
+      <div class="champ">
+        <span class="etiquette">Statut</span>
+        <input type="hidden" name="statut">
+        <div class="choix" data-champ="statut">
+          <button type="button" data-valeur="en_attente">⏳ En attente</button>
+          <button type="button" data-valeur="installe">🔧 Installé</button>
+          <button type="button" data-valeur="probleme">⚠️ Problème</button>
+          <button type="button" data-valeur="complete">✅ Tout est bon</button>
+        </div>
+      </div>
+
+      <label class="interrupteur">
+        <input type="checkbox" name="rappele">
+        <span>Client rappelé après l'installation</span>
+      </label>
+
+      <label class="champ-probleme" hidden>C'est quoi le problème?
+        <textarea name="probleme" rows="2" placeholder="Ex. technicien pas venu, modem ne marche pas…"></textarea>
+      </label>
+
+      <label>Notes
+        <textarea name="notes" rows="2"></textarea>
+      </label>
+
+      <div class="photo">
+        <img class="apercu" alt="Photo" hidden>
+        <label class="bouton">📷 Photo de la commande
+          <input class="input-photo" type="file" accept="image/*" hidden>
+        </label>
+        <button type="button" class="lien retirer-photo" hidden>Retirer la photo</button>
+      </div>
+
+      <p class="petit info"></p>
+      <button type="button" class="lien danger supprimer" hidden>Supprimer ce BRS</button>
+      <p class="message"></p>
+
+      <div class="actions">
+        <button type="button" class="annuler">Annuler</button>
+        <button type="submit" class="principal">Enregistrer</button>
+      </div>
+    </form>
+  </section>
+
+
+  <nav id="nav" hidden>
+    <button data-ecran="accueil"><span class="icone">🏠</span>Aujourd'hui<span id="pastille" class="pastille" hidden></span></button>
+    <button data-ecran="clients"><span class="icone">👥</span>Clients</button>
+    <button data-ecran="brs"><span class="icone">🔧</span>BRS</button>
+  </nav>
+
+  <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
