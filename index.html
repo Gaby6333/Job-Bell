@@ -12,14 +12,14 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Équipe">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 
   <div class="haut" id="haut">
     <header>
       <h1 id="titre-ecran">Aujourd'hui</h1>
-      <button id="btn-deconnexion" class="lien-blanc" hidden>Déconnexion</button>
+      <button id="btn-profil" class="avatar-profil" hidden aria-label="Mon profil"></button>
     </header>
     <div id="barre-portee" class="segment" hidden>
       <button data-moi="0">Toute l'équipe</button>
@@ -328,6 +328,93 @@
   </section>
 
 
+  <!-- Profil -->
+  <section id="ecran-profil" hidden>
+    <form id="form-profil" class="fiche">
+      <div class="fiche-haut">
+        <button type="button" class="retour" id="retour-profil">‹ Retour</button>
+        <h2 class="titre-fiche">Mon profil</h2>
+      </div>
+
+      <div class="profil-haut">
+        <div id="apercu-profil" class="grand-avatar"></div>
+        <p id="nom-apercu" class="nom-apercu"></p>
+        <p id="courriel-profil" class="petit"></p>
+      </div>
+
+      <div class="groupe">
+        <label>Mon nom
+          <input name="nom" required autocomplete="name" placeholder="Prénom et nom">
+        </label>
+        <p class="petit gauche">C'est le nom que l'équipe voit sur tes clients et tes BRS.</p>
+      </div>
+
+      <div class="groupe">
+        <p class="groupe-titre">Mon emoji</p>
+        <input type="hidden" name="emoji">
+        <div class="choix emojis" data-champ="emoji">
+          <button type="button" data-valeur="😎">😎</button>
+          <button type="button" data-valeur="🔥">🔥</button>
+          <button type="button" data-valeur="⭐">⭐</button>
+          <button type="button" data-valeur="🚀">🚀</button>
+          <button type="button" data-valeur="💪">💪</button>
+          <button type="button" data-valeur="🎯">🎯</button>
+          <button type="button" data-valeur="🦁">🦁</button>
+          <button type="button" data-valeur="🐺">🐺</button>
+          <button type="button" data-valeur="⚡">⚡</button>
+          <button type="button" data-valeur="👑">👑</button>
+          <button type="button" data-valeur="🍀">🍀</button>
+          <button type="button" data-valeur="😀">😀</button>
+        </div>
+        <p class="groupe-titre">Ma couleur</p>
+        <input type="hidden" name="couleur">
+        <div class="choix couleurs" data-champ="couleur">
+          <button type="button" data-valeur="#00549a" style="background:#00549a" aria-label="Couleur"></button>
+          <button type="button" data-valeur="#d6001c" style="background:#d6001c" aria-label="Couleur"></button>
+          <button type="button" data-valeur="#1f8a3a" style="background:#1f8a3a" aria-label="Couleur"></button>
+          <button type="button" data-valeur="#7b3fa0" style="background:#7b3fa0" aria-label="Couleur"></button>
+          <button type="button" data-valeur="#e67e00" style="background:#e67e00" aria-label="Couleur"></button>
+          <button type="button" data-valeur="#0097a7" style="background:#0097a7" aria-label="Couleur"></button>
+          <button type="button" data-valeur="#c2185b" style="background:#c2185b" aria-label="Couleur"></button>
+          <button type="button" data-valeur="#455a64" style="background:#455a64" aria-label="Couleur"></button>
+        </div>
+      </div>
+
+      <div class="groupe">
+        <p class="groupe-titre">Mon mois</p>
+        <div class="mini-stats">
+          <div><strong id="p-ventes">0</strong><span>ventes</span></div>
+          <div><strong id="p-installs">0</strong><span>installations</span></div>
+          <div><strong id="p-suivis">0</strong><span>clients à suivre</span></div>
+        </div>
+      </div>
+
+      <div class="groupe">
+        <p class="groupe-titre">Apparence</p>
+        <input type="hidden" name="theme">
+        <div class="choix grille-3" data-champ="theme">
+          <button type="button" data-valeur=""><span>📱</span>Auto</button>
+          <button type="button" data-valeur="clair"><span>☀️</span>Clair</button>
+          <button type="button" data-valeur="sombre"><span>🌙</span>Sombre</button>
+        </div>
+      </div>
+
+      <div class="groupe" id="groupe-notifs-profil">
+        <p class="groupe-titre">Notifications</p>
+        <p id="profil-notifs" class="petit gauche"></p>
+        <button type="button" id="btn-tester-profil">🔔 Tester les notifications</button>
+      </div>
+
+      <button type="button" id="btn-deconnexion" class="lien danger">Se déconnecter</button>
+      <p class="message"></p>
+
+      <div class="actions">
+        <button type="submit" class="principal gros">Enregistrer</button>
+      </div>
+    </form>
+  </section>
+
+
   <button id="btn-plus" class="flottant" aria-label="Ajouter" hidden>+</button>
 
   <div id="feuille" class="feuille" hidden>
@@ -355,7 +442,7 @@
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-  <script src="config.js?v=10"></script>
-  <script src="app.js?v=10"></script>
+  <script src="config.js?v=11"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>

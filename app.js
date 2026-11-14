@@ -97,10 +97,22 @@ function formatTel(texte) {
   return texte.trim()
 }
 
-function nomUser() {
-  if (modeEssai) return "Moi"
-  return user.user_metadata.nom || user.email
+function monProfil() {
+  if (modeEssai) return JSON.parse(lireMemoire("profil") || "{}")
+  return user.user_metadata || {}
 }
+
+function nomUser() {
+  if (modeEssai) return monProfil().nom || "Moi"
+  return monProfil().nom || user.email
+}
+
+function appliquerTheme(theme) {
+  if (theme) document.documentElement.dataset.theme = theme
+  else delete document.documentElement.dataset.theme
+}
+
+appliquerTheme(lireMemoire("theme") || "")
 
 function toast(texte) {
   const boite = $("toast")
@@ -119,7 +131,7 @@ function afficherErreur(texte) {
 // ---------- Écrans ----------
 
 function montrer(ecran) {
-  const ecrans = ["connexion", "accueil", "clients", "brs", "fiche-client", "fiche-brs"]
+  const ecrans = ["connexion", "accueil", "clients", "brs", "fiche-client", "fiche-brs", "profil"]
   for (const nom of ecrans) {
     $("ecran-" + nom).hidden = nom !== ecran
   }
@@ -134,7 +146,8 @@ function montrer(ecran) {
   $("nav").hidden = !principal
   $("btn-plus").hidden = !principal || ecran === "accueil"
   $("barre-portee").hidden = !principal
-  $("btn-deconnexion").hidden = modeEssai || !principal
+  $("btn-profil").hidden = !principal
+  $("btn-deconnexion").hidden = modeEssai
   $("feuille").hidden = true
   document.body.classList.toggle("page-connexion", ecran === "connexion")
 
@@ -509,7 +522,8 @@ function afficherAccueil() {
   const heure = new Date().getHours()
   const salut = heure < 12 ? "Bon matin" : heure < 18 ? "Bonjour" : "Bonsoir"
   $("hero-date").textContent = new Date().toLocaleDateString("fr-CA", { weekday: "long", day: "numeric", month: "long" })
-  $("bonjour").textContent = salut + prenom + " 👋"
+  $("bonjour").textContent = salut + prenom + " " + (monProfil().emoji || "👋")
+  majAvatarProfil()
 
   $("stat-ventes").textContent = mesClients.filter(c => c.statut === "vendu" && (c.created_at || "").slice(0, 7) === moisCourant).length
   $("stat-installs").textContent = mesBrs.filter(b => (b.statut === "installe" || b.statut === "complete") && (b.date_install || "").slice(0, 7) === moisCourant).length
@@ -842,35 +856,37 @@ $("form-brs").onsubmit = function (e) {
   enregistrer(e.target, CHAMPS_BRS)
 }
 
-document.querySelectorAll("form.fiche").forEach(function (form) {
-  form.querySelectorAll(".choix").forEach(function (div) {
-    div.onclick = function (e) {
-      const bouton = e.target.closest("button")
-      if (!bouton) return
-      const input = form.elements[div.dataset.champ]
-      if (div.dataset.multiple) {
-        let valeurs = input.value ? input.value.split(", ") : []
-        if (valeurs.includes(bouton.dataset.valeur)) {
-          valeurs = valeurs.filter(v => v !== bouton.dataset.valeur)
-        } else {
-          if (div.dataset.exclusif) {
-            const autres = Array.from(div.querySelectorAll("button")).map(b => b.dataset.valeur)
-            valeurs = valeurs.filter(v => !autres.includes(v))
-          }
-          valeurs.push(bouton.dataset.valeur)
-        }
-        input.value = valeurs.join(", ")
+document.querySelectorAll(".choix").forEach(function (div) {
+  const form = div.closest("form")
+  div.onclick = function (e) {
+    const bouton = e.target.closest("button")
+    if (!bouton) return
+    const input = form.elements[div.dataset.champ]
+    if (div.dataset.multiple) {
+      let valeurs = input.value ? input.value.split(", ") : []
+      if (valeurs.includes(bouton.dataset.valeur)) {
+        valeurs = valeurs.filter(v => v !== bouton.dataset.valeur)
       } else {
-        input.value = bouton.dataset.valeur
-        form.querySelector(".message").textContent = ""
-        if (div.dataset.champ === "statut" && input.value === "complete" && form.elements.rappele) {
-          form.elements.rappele.checked = true
+        if (div.dataset.exclusif) {
+          const autres = Array.from(div.querySelectorAll("button")).map(b => b.dataset.valeur)
+          valeurs = valeurs.filter(v => !autres.includes(v))
         }
+        valeurs.push(bouton.dataset.valeur)
       }
-      majChoix(form)
+      input.value = valeurs.join(", ")
+    } else {
+      input.value = bouton.dataset.valeur
+      form.querySelector(".message").textContent = ""
+      if (div.dataset.champ === "statut" && input.value === "complete" && form.elements.rappele) {
+        form.elements.rappele.checked = true
+      }
     }
-  })
+    majChoix(form)
+    if (form.id === "form-profil") apercuProfil()
+  }
+})
 
+document.querySelectorAll("form.fiche[data-table]").forEach(function (form) {
   form.querySelectorAll(".dates-rapides").forEach(function (div) {
     div.onclick = function (e) {
       const bouton = e.target.closest("button")
@@ -1078,6 +1094,91 @@ async function testerNotifs() {
     return
   }
   toast("Notification envoyée, regarde ton téléphone")
+}
+
+
+// ---------- Profil ----------
+
+function majAvatarProfil() {
+  const profil = monProfil()
+  const bouton = $("btn-profil")
+  bouton.textContent = profil.emoji || initiales(nomUser())
+  bouton.style.background = profil.couleur || "rgba(255, 255, 255, 0.2)"
+}
+
+function apercuProfil() {
+  const form = $("form-profil")
+  const nom = form.elements.nom.value.trim() || "?"
+  $("apercu-profil").textContent = form.elements.emoji.value || initiales(nom)
+  $("apercu-profil").style.background = form.elements.couleur.value || "var(--bleu)"
+  $("nom-apercu").textContent = nom
+  appliquerTheme(form.elements.theme.value)
+}
+
+$("btn-profil").onclick = ouvrirProfil
+$("retour-profil").onclick = function () {
+  appliquerTheme(lireMemoire("theme") || "")
+  montrer(ecranActuel)
+}
+
+function ouvrirProfil() {
+  const form = $("form-profil")
+  const profil = monProfil()
+  form.elements.nom.value = nomUser()
+  form.elements.emoji.value = profil.emoji || ""
+  form.elements.couleur.value = profil.couleur || "#00549a"
+  form.elements.theme.value = lireMemoire("theme") || ""
+  form.querySelector(".message").textContent = ""
+  $("courriel-profil").textContent = modeEssai ? "Mode essai" : user.email
+
+  const moisCourant = aujourdhui().slice(0, 7)
+  const mesClients = clients.filter(c => c.user_id === user.id)
+  const mesBrs = brs.filter(b => b.user_id === user.id)
+  $("p-ventes").textContent = mesClients.filter(c => c.statut === "vendu" && (c.created_at || "").slice(0, 7) === moisCourant).length
+  $("p-installs").textContent = mesBrs.filter(b => (b.statut === "installe" || b.statut === "complete") && (b.date_install || "").slice(0, 7) === moisCourant).length
+  $("p-suivis").textContent = mesClients.filter(c => c.statut === "a_rappeler").length
+
+  $("groupe-notifs-profil").hidden = modeEssai
+  $("profil-notifs").textContent = "Un résumé de ta journée chaque matin à 8 h. Active-les à partir de l'écran Aujourd'hui."
+
+  majChoix(form)
+  apercuProfil()
+  montrer("profil")
+}
+
+$("form-profil").elements.nom.oninput = apercuProfil
+
+$("btn-tester-profil").onclick = testerNotifs
+
+$("form-profil").onsubmit = async function (e) {
+  e.preventDefault()
+  const form = e.target
+  const infos = {
+    nom: form.elements.nom.value.trim(),
+    emoji: form.elements.emoji.value,
+    couleur: form.elements.couleur.value
+  }
+  ecrireMemoire("theme", form.elements.theme.value)
+
+  if (modeEssai) {
+    ecrireMemoire("profil", JSON.stringify(infos))
+  } else {
+    const ancienNom = nomUser()
+    const reponse = await db.auth.updateUser({ data: infos })
+    if (reponse.error) {
+      form.querySelector(".message").textContent = "Erreur : " + reponse.error.message
+      return
+    }
+    user = reponse.data.user
+    if (infos.nom !== ancienNom) {
+      await db.from("clients").update({ vendeur: infos.nom }).eq("user_id", user.id)
+      await db.from("brs").update({ vendeur: infos.nom }).eq("user_id", user.id)
+    }
+  }
+
+  toast("Profil enregistré ✓")
+  montrer(ecranActuel)
+  await rafraichir()
 }
 
 demarrer()
