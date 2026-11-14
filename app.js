@@ -442,7 +442,8 @@ function carteClient(c) {
     }
   }
 
-  const details = [c.offre, c.appareil, c.prix ? c.prix + " $/mois" : ""].filter(Boolean).join(" · ")
+  const total = totalPrix(c.prix)
+  const details = [c.offre, c.appareil, total ? "Total " + formatPrix(total) + " $/mois" : ""].filter(Boolean).join(" · ")
   const li = creerCarte(c, badge, couleur, details, couleur)
   li.onclick = () => ouvrirClient(c)
   return li
@@ -783,6 +784,8 @@ function majChoix(form) {
     })
   })
 
+  if (form.id === "form-client") afficherPrix(form)
+
   const appareil = form.querySelector(".champ-appareil")
   if (appareil) appareil.hidden = !form.elements.offre.value.includes("Post 24 mois")
 
@@ -855,7 +858,6 @@ async function enregistrer(form, champs) {
 $("form-client").onsubmit = function (e) {
   e.preventDefault()
   if (!e.target.elements.offre.value.includes("Post 24 mois")) e.target.elements.appareil.value = ""
-  e.target.elements.prix.value = e.target.elements.prix.value.replace("$", "").trim()
   enregistrer(e.target, CHAMPS_CLIENT)
 }
 
@@ -937,7 +939,7 @@ document.querySelectorAll("form.fiche[data-table]").forEach(function (form) {
       const details = ["Tél. : " + tel, "Commande : " + form.elements.commande.value, "Services : " + form.elements.services.value]
       ajouterCalendrier("🔧 Installation " + marque + " – " + nom, form.elements.date_install.value, details.join("\n"), form.elements.adresse.value)
     } else {
-      const details = ["Tél. : " + tel, "Proposé : " + form.elements.offre.value, "Téléphone : " + form.elements.appareil.value, "Prix : " + form.elements.prix.value + " $/mois"]
+      const details = ["Tél. : " + tel, "Proposé : " + form.elements.offre.value, "Téléphone : " + form.elements.appareil.value, "Prix : " + form.elements.prix.value.replace(/ · /g, ", ") + " (total " + formatPrix(totalPrix(form.elements.prix.value)) + " $/mois)"]
       ajouterCalendrier("📞 Rappeler " + nom, form.elements.rappel.value, details.join("\n"), "")
     }
   }
@@ -1212,6 +1214,88 @@ $("form-profil").onsubmit = async function (e) {
   toast("Profil enregistré ✓")
   montrer(ecranActuel)
   await rafraichir()
+}
+
+
+// ---------- Prix proposés ----------
+
+function lignesPrix(offre) {
+  const lignes = []
+  for (const choix of offre ? offre.split(", ") : []) {
+    if (choix.startsWith("Add-line")) {
+      const nombre = choix.endsWith("4+") ? 4 : Number(choix.slice(-1))
+      for (let i = 1; i <= nombre; i++) lignes.push("Ligne " + i)
+    } else {
+      lignes.push(choix)
+    }
+  }
+  return lignes
+}
+
+function lirePrix(texte) {
+  const valeurs = {}
+  for (const morceau of (texte || "").split(" · ")) {
+    const position = morceau.lastIndexOf(": ")
+    if (position > 0) valeurs[morceau.slice(0, position)] = morceau.slice(position + 2)
+  }
+  return valeurs
+}
+
+function nombre(texte) {
+  const valeur = parseFloat(String(texte).replace(",", ".").replace("$", ""))
+  return isNaN(valeur) ? 0 : valeur
+}
+
+function totalPrix(texte) {
+  if (!texte) return 0
+  if (!texte.includes(": ")) return nombre(texte)
+  let total = 0
+  for (const valeur of Object.values(lirePrix(texte))) total += nombre(valeur)
+  return total
+}
+
+function formatPrix(valeur) {
+  const decimales = Number.isInteger(valeur) ? 0 : 2
+  return valeur.toLocaleString("fr-CA", { minimumFractionDigits: decimales, maximumFractionDigits: 2 })
+}
+
+function afficherPrix(form) {
+  const texte = form.elements.prix.value
+  const lignes = lignesPrix(form.elements.offre.value)
+  const valeurs = lirePrix(texte)
+  if (texte && !texte.includes(": ") && lignes.length) valeurs[lignes[0]] = texte
+
+  const boite = $("prix-lignes")
+  boite.innerHTML = ""
+  for (const ligne of lignes) {
+    const rangee = document.createElement("label")
+    rangee.className = "ligne-prix"
+    rangee.innerHTML = `
+      <span class="nom-prix"></span>
+      <span class="avec-suffixe">
+        <input inputmode="decimal" autocomplete="off" placeholder="0">
+        <span>$</span>
+      </span>
+    `
+    rangee.querySelector(".nom-prix").textContent = ligne
+    const input = rangee.querySelector("input")
+    input.dataset.ligne = ligne
+    input.value = valeurs[ligne] || ""
+    input.oninput = () => majPrix(form)
+    boite.appendChild(rangee)
+  }
+  $("bloc-prix").hidden = lignes.length === 0
+  majPrix(form)
+}
+
+function majPrix(form) {
+  const morceaux = []
+  for (const input of $("prix-lignes").querySelectorAll("input")) {
+    const valeur = input.value.replace("$", "").trim()
+    if (valeur) morceaux.push(input.dataset.ligne + ": " + valeur)
+  }
+  form.elements.prix.value = morceaux.join(" · ")
+  $("total-prix").textContent = formatPrix(totalPrix(form.elements.prix.value)) + " $"
 }
 
 demarrer()

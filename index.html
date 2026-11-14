@@ -12,7 +12,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Équipe">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
 
@@ -172,12 +172,12 @@
           <input name="appareil" list="appareils" autocomplete="off" placeholder="Ex. iPhone Pro 256 Go">
         </label>
         <datalist id="appareils"></datalist>
-        <label>Prix proposé
-          <span class="avec-suffixe">
-            <input name="prix" inputmode="decimal" autocomplete="off" placeholder="0">
-            <span>$ / mois</span>
-          </span>
-        </label>
+        <input type="hidden" name="prix">
+        <div id="bloc-prix" class="bloc-prix" hidden>
+          <p class="sous-titre">Prix proposés</p>
+          <div id="prix-lignes" class="prix-lignes"></div>
+          <p class="total-prix">Total <b id="total-prix">0 $</b> / mois</p>
+        </div>
       </div>
 
       <div class="groupe">
@@ -451,7 +451,7 @@
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-  <script src="config.js?v=15"></script>
-  <script src="app.js?v=15"></script>
+  <script src="config.js?v=16"></script>
+  <script src="app.js?v=16"></script>
 </body>
 </html>
