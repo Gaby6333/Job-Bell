@@ -805,3 +805,16 @@ nav button.actif .icone { filter: none; opacity: 1; transform: scale(1.08); }
 .plus summary small { color: var(--gris); font-weight: 500; }
 .plus[open] summary { border-radius: var(--rayon) var(--rayon) 0 0; box-shadow: none; }
 .plus[open] .groupe { border-radius: 0 0 var(--rayon) var(--rayon); padding-top: 4px; }
+
+.avec-suffixe { position: relative; display: block; }
+.avec-suffixe input { padding-right: 80px; }
+.avec-suffixe span {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gris);
+  font-size: 15px;
+  font-weight: 600;
+  pointer-events: none;
+}

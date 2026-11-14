@@ -9,6 +9,8 @@ create table clients (
   nom text not null,
   telephone text,
   offre text,
+  appareil text,
+  prix text,
   notes text,
   statut text default 'a_rappeler',
   rappel date,
@@ -82,3 +84,7 @@ select cron.schedule('resume-matin', '0 * * * *', $$
     body := '{}'::jsonb
   )
 $$);
+
+-- Téléphone et prix proposés (si la table clients existait déjà)
+alter table clients add column if not exists appareil text;
+alter table clients add column if not exists prix text;

@@ -30,7 +30,7 @@ const STATUTS_BRS = {
   complete: "Tout est bon"
 }
 
-const CHAMPS_CLIENT = ["nom", "telephone", "statut", "rappel", "offre", "notes"]
+const CHAMPS_CLIENT = ["nom", "telephone", "statut", "rappel", "offre", "appareil", "prix", "notes"]
 const CHAMPS_BRS = ["marque", "nom", "telephone", "commande", "adresse", "services", "date_install", "statut", "rappele", "probleme", "notes"]
 
 const COLONNES_CLIENTS = "id, created_at, user_id, vendeur, modifie_par, " + CHAMPS_CLIENT.join(", ")
@@ -271,7 +271,9 @@ async function charger(table, colonnes) {
   }
   const reponse = await db.from(table).select(colonnes)
   if (reponse.error) {
-    if (table === "brs") {
+    if (reponse.error.message.includes("appareil") || reponse.error.message.includes("prix")) {
+      afficherErreur("Il manque les colonnes Téléphone et Prix dans Supabase : exécute le petit texte SQL envoyé par Claude.")
+    } else if (table === "brs") {
       afficherErreur("La section BRS ne se charge pas (" + reponse.error.message + ")")
     } else {
       afficherErreur("Erreur de chargement : " + reponse.error.message)
@@ -354,7 +356,7 @@ function visibles(liste) {
 function correspond(element, recherche) {
   if (!recherche) return true
   const chiffres = recherche.replace(/\D/g, "")
-  const texte = [element.nom, element.offre, element.notes, element.vendeur, element.adresse, element.commande, element.services, element.marque]
+  const texte = [element.nom, element.offre, element.appareil, element.notes, element.vendeur, element.adresse, element.commande, element.services, element.marque]
     .filter(Boolean).join(" ").toLowerCase()
   const tel = (element.telephone || "").replace(/\D/g, "")
   return texte.includes(recherche) || (chiffres.length >= 3 && tel.includes(chiffres))
@@ -414,7 +416,8 @@ function carteClient(c) {
     }
   }
 
-  const li = creerCarte(c, badge, couleur, c.offre, couleur)
+  const details = [c.offre, c.appareil, c.prix ? c.prix + " $/mois" : ""].filter(Boolean).join(" · ")
+  const li = creerCarte(c, badge, couleur, details, couleur)
   li.onclick = () => ouvrirClient(c)
   return li
 }
@@ -590,7 +593,21 @@ function filtrerClients(liste, filtre) {
   return liste.filter(c => c.statut === filtre)
 }
 
+function remplirAppareils() {
+  const modeles = []
+  for (const c of clients) {
+    if (c.appareil && !modeles.includes(c.appareil)) modeles.push(c.appareil)
+  }
+  $("appareils").innerHTML = ""
+  for (const modele of modeles.sort()) {
+    const option = document.createElement("option")
+    option.value = modele
+    $("appareils").appendChild(option)
+  }
+}
+
 function afficherClients() {
+  remplirAppareils()
   const recherche = $("recherche-clients").value.trim().toLowerCase()
   const mesClients = visibles(clients).filter(c => correspond(c, recherche))
 
@@ -739,6 +756,9 @@ function majChoix(form) {
     })
   })
 
+  const appareil = form.querySelector(".champ-appareil")
+  if (appareil) appareil.hidden = !form.elements.offre.value.includes("Post 24 mois")
+
   const rappel = form.querySelector(".champ-rappel")
   if (rappel) rappel.hidden = form.elements.statut.value !== "a_rappeler"
 
@@ -793,7 +813,11 @@ async function enregistrer(form, champs) {
   bouton.disabled = false
 
   if (erreur) {
-    form.querySelector(".message").textContent = "Erreur : " + erreur.message
+    let texte = "Erreur : " + erreur.message
+    if (erreur.message.includes("appareil") || erreur.message.includes("prix")) {
+      texte = "Il manque les colonnes Téléphone et Prix dans Supabase : exécute le petit texte SQL envoyé par Claude."
+    }
+    form.querySelector(".message").textContent = texte
     return
   }
   toast("Enregistré ✓")
@@ -803,6 +827,8 @@ async function enregistrer(form, champs) {
 
 $("form-client").onsubmit = function (e) {
   e.preventDefault()
+  if (!e.target.elements.offre.value.includes("Post 24 mois")) e.target.elements.appareil.value = ""
+  e.target.elements.prix.value = e.target.elements.prix.value.replace("$", "").trim()
   enregistrer(e.target, CHAMPS_CLIENT)
 }
 
@@ -882,7 +908,7 @@ document.querySelectorAll("form.fiche").forEach(function (form) {
       const details = ["Tél. : " + tel, "Commande : " + form.elements.commande.value, "Services : " + form.elements.services.value]
       ajouterCalendrier("🔧 Installation " + marque + " – " + nom, form.elements.date_install.value, details.join("\n"), form.elements.adresse.value)
     } else {
-      const details = ["Tél. : " + tel, "Proposé : " + form.elements.offre.value]
+      const details = ["Tél. : " + tel, "Proposé : " + form.elements.offre.value, "Téléphone : " + form.elements.appareil.value, "Prix : " + form.elements.prix.value + " $/mois"]
       ajouterCalendrier("📞 Rappeler " + nom, form.elements.rappel.value, details.join("\n"), "")
     }
   }

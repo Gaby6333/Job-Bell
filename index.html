@@ -12,7 +12,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Équipe">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 
@@ -162,6 +162,16 @@
           <button type="button" data-valeur="Add-line 3">3</button>
           <button type="button" data-valeur="Add-line 4+">4+</button>
         </div>
+        <label class="champ-appareil" hidden>Quel téléphone?
+          <input name="appareil" list="appareils" autocomplete="off" placeholder="Ex. iPhone Pro 256 Go">
+        </label>
+        <datalist id="appareils"></datalist>
+        <label>Prix proposé
+          <span class="avec-suffixe">
+            <input name="prix" inputmode="decimal" autocomplete="off" placeholder="0">
+            <span>$ / mois</span>
+          </span>
+        </label>
       </div>
 
       <div class="groupe">
@@ -345,7 +355,7 @@
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-  <script src="config.js?v=8"></script>
-  <script src="app.js?v=8"></script>
+  <script src="config.js?v=9"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
