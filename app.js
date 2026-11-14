@@ -1037,7 +1037,7 @@ async function majCarteNotifs() {
     const inscription = await navigator.serviceWorker.ready
     const abonnement = await inscription.pushManager.getSubscription()
     if (abonnement) {
-      carteNotifs("Notifications activées", "Résumé de ta journée chaque matin à 8 h.", "Tester")
+      $("carte-notifs").hidden = true
       return
     }
   }
@@ -1048,8 +1048,7 @@ async function majCarteNotifs() {
 $("btn-notifs").onclick = async function () {
   const bouton = $("btn-notifs")
   bouton.disabled = true
-  if (bouton.textContent === "Tester") await testerNotifs()
-  else await activerNotifs()
+  await activerNotifs()
   bouton.disabled = false
 }
 
@@ -1083,32 +1082,6 @@ async function activerNotifs() {
   }
   majCarteNotifs()
 }
-
-async function testerNotifs() {
-  const session = (await db.auth.getSession()).data.session
-  let resultat
-  try {
-    const reponse = await fetch(SUPABASE_URL + "/functions/v1/" + FONCTION_NOTIFS, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + session.access_token,
-        "apikey": SUPABASE_KEY
-      },
-      body: JSON.stringify({ test: true })
-    })
-    resultat = await reponse.text()
-    if (!reponse.ok) {
-      alert("Le test n'a pas marché (" + reponse.status + ") : " + resultat)
-      return
-    }
-  } catch (erreur) {
-    alert("Impossible de joindre la fonction de notifications. Vérifie son adresse dans Supabase et que « Verify JWT » est désactivé.")
-    return
-  }
-  toast("Notification envoyée, regarde ton téléphone")
-}
-
 
 // ---------- Profil ----------
 
@@ -1157,7 +1130,10 @@ function ouvrirProfil() {
   $("p-suivis").textContent = mesClients.filter(c => c.statut === "a_rappeler").length
 
   $("groupe-notifs-profil").hidden = modeEssai
-  $("profil-notifs").textContent = "Un résumé de ta journée chaque matin à 8 h. Active-les à partir de l'écran Aujourd'hui."
+  $("profil-notifs").textContent = "Un résumé de ta journée chaque matin à 8 h. Si elles ne sont pas encore activées, fais-le à partir de l'écran Aujourd'hui."
+  if (notifsPossibles && Notification.permission === "granted") {
+    $("profil-notifs").textContent = "🔔 Activées : tu reçois le résumé de ta journée chaque matin à 8 h."
+  }
 
   majChoix(form)
   apercuProfil()
@@ -1197,7 +1173,6 @@ function photoCarree(fichier, taille) {
   })
 }
 
-$("btn-tester-profil").onclick = testerNotifs
 
 $("form-profil").onsubmit = async function (e) {
   e.preventDefault()
