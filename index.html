@@ -12,7 +12,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Équipe">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 
@@ -155,6 +155,12 @@
           <button type="button" data-valeur="Post 24 mois"><b>Post</b><small>24 mois</small></button>
           <button type="button" data-valeur="Cross-sell"><b>Cross-sell</b><small>Autre service</small></button>
         </div>
+        <p class="sous-titre">Internet maison</p>
+        <div class="choix grille-3" data-champ="offre" data-multiple="1" data-exclusif="1">
+          <button type="button" data-valeur="Internet Uno"><span>🌐</span>Uno</button>
+          <button type="button" data-valeur="Internet Duo"><span>🌐</span>Duo</button>
+          <button type="button" data-valeur="Internet Trio"><span>🌐</span>Trio</button>
+        </div>
         <p class="sous-titre">Add-line</p>
         <div class="choix grille-4" data-champ="offre" data-multiple="1" data-exclusif="1">
           <button type="button" data-valeur="Add-line 1">1</button>
@@ -230,7 +236,7 @@
     <form id="form-brs" class="fiche" data-table="brs">
       <div class="fiche-haut">
         <button type="button" class="retour annuler">‹ Retour</button>
-        <h2 class="titre-fiche">Nouveau BRS</h2>
+        <h2 class="titre-fiche">Nouveau suivi BRS</h2>
       </div>
 
       <input type="hidden" name="marque">
@@ -259,11 +265,10 @@
       <div class="groupe">
         <p class="groupe-titre">Installation</p>
         <input type="hidden" name="services">
-        <div class="choix grille-2" data-champ="services" data-multiple="1">
+        <div class="choix grille-3" data-champ="services" data-multiple="1">
           <button type="button" data-valeur="Internet"><span>🌐</span>Internet</button>
           <button type="button" data-valeur="Télé"><span>📺</span>Télé</button>
           <button type="button" data-valeur="Téléphone maison"><span>☎️</span>Téléphone</button>
-          <button type="button" data-valeur="Maison intelligente"><span>🏠</span>Maison intel.</button>
         </div>
 
         <label>Date d'installation
@@ -427,11 +432,11 @@
       <p class="feuille-titre">Ajouter</p>
       <button data-ajouter="client" class="option">
         <span class="rond-icone client">👤</span>
-        <span><b>Suivi client</b><small>AVPA, Post, add-line, cross-sell…</small></span>
+        <span><b>Suivi client</b><small>AVPA, Post, Internet, add-line…</small></span>
       </button>
       <button data-ajouter="brs" class="option">
         <span class="rond-icone brs">🔧</span>
-        <span><b>BRS</b><small>Installation Bell ou Virgin Plus</small></span>
+        <span><b>Suivi BRS</b><small>Installation déjà vendue, Bell ou Virgin Plus</small></span>
       </button>
       <button class="fermer-feuille">Annuler</button>
     </div>
@@ -446,7 +451,7 @@
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-  <script src="config.js?v=14"></script>
-  <script src="app.js?v=14"></script>
+  <script src="config.js?v=15"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>

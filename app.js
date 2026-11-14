@@ -765,7 +765,7 @@ async function ouvrirBrs(b) {
   const form = $("form-brs")
   ficheId = b ? b.id : null
   remplir(form, b || { statut: "en_attente" }, CHAMPS_BRS)
-  preparerFiche(form, b, b ? b.nom : "Nouveau BRS")
+  preparerFiche(form, b, b ? b.nom : "Nouveau suivi BRS")
   montrer("fiche-brs")
   if (b) {
     photo = await chargerPhoto("brs", b.id)
