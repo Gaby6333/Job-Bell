@@ -3,15 +3,10 @@ import { createClient } from "npm:@supabase/supabase-js@2.118.0"
 
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!)
 
-webpush.setVapidDetails(
-  "https://gaby6333.github.io/Job-Bell/",
-  Deno.env.get("VAPID_PUBLIC_KEY")!,
-  Deno.env.get("VAPID_PRIVATE_KEY")!
-)
-
 const entetes = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-region, x-supabase-api-version",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS"
 }
 
 function maintenant() {
@@ -76,6 +71,18 @@ function reponse(contenu: any, statut = 200) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: entetes })
+  try {
+    return await traiter(req)
+  } catch (erreur: any) {
+    return reponse({ erreur: erreur.message }, 500)
+  }
+})
+
+async function traiter(req: Request) {
+  const publique = Deno.env.get("VAPID_PUBLIC_KEY")
+  const privee = Deno.env.get("VAPID_PRIVATE_KEY")
+  if (!publique || !privee) return reponse({ erreur: "Il manque les secrets VAPID_PUBLIC_KEY ou VAPID_PRIVATE_KEY" }, 500)
+  webpush.setVapidDetails("https://gaby6333.github.io/Job-Bell/", publique.trim(), privee.trim())
 
   const corps = await req.json().catch(() => ({}))
   const { date, heure } = maintenant()
@@ -88,7 +95,7 @@ Deno.serve(async (req) => {
     abonnements = (await db.from("abonnements").select("*").eq("user_id", data.user.id)).data || []
     if (abonnements.length === 0) return reponse({ erreur: "Aucun appareil inscrit" }, 400)
   } else {
-    if (req.headers.get("x-cle") !== Deno.env.get("CLE_CRON")) return reponse({ erreur: "Non autorisé" }, 403)
+    if (req.headers.get("x-cle") !== (Deno.env.get("CLE_CRON") || "").trim()) return reponse({ erreur: "Non autorisé" }, 403)
     if (heure !== 8 && !corps.forcer) return reponse({ message: "Pas encore 8 h", heure })
     abonnements = (await db.from("abonnements").select("*")).data || []
   }
@@ -108,5 +115,7 @@ Deno.serve(async (req) => {
     if (await envoyer(abonnement, message)) envoyes++
   }
 
+  if (corps.test && envoyes === 0) return reponse({ erreur: "La notification n'a pas pu être envoyée à ton appareil" }, 500)
+
   return reponse({ envoyes })
-})
+}

@@ -1056,9 +1056,25 @@ async function activerNotifs() {
 }
 
 async function testerNotifs() {
-  const reponse = await db.functions.invoke("resume-matin", { body: { test: true } })
-  if (reponse.error) {
-    alert("Le test n'a pas marché : " + reponse.error.message)
+  const session = (await db.auth.getSession()).data.session
+  let resultat
+  try {
+    const reponse = await fetch(SUPABASE_URL + "/functions/v1/resume-matin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + session.access_token,
+        "apikey": SUPABASE_KEY
+      },
+      body: JSON.stringify({ test: true })
+    })
+    resultat = await reponse.text()
+    if (!reponse.ok) {
+      alert("Le test n'a pas marché (" + reponse.status + ") : " + resultat)
+      return
+    }
+  } catch (erreur) {
+    alert("Impossible de joindre la fonction resume-matin. Vérifie son nom dans Supabase et que « Verify JWT » est désactivé.")
     return
   }
   toast("Notification envoyée, regarde ton téléphone")
