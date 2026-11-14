@@ -79,7 +79,7 @@ create extension if not exists pg_net;
 
 select cron.schedule('resume-matin', '0 * * * *', $$
   select net.http_post(
-    url := 'https://glvalhrynzfdaasherja.supabase.co/functions/v1/resume-matin',
+    url := 'https://glvalhrynzfdaasherja.supabase.co/functions/v1/bright-api',
     headers := '{"Content-Type": "application/json", "x-cle": "CLE_CRON"}'::jsonb,
     body := '{}'::jsonb
   )

@@ -1088,7 +1088,7 @@ async function testerNotifs() {
   const session = (await db.auth.getSession()).data.session
   let resultat
   try {
-    const reponse = await fetch(SUPABASE_URL + "/functions/v1/resume-matin", {
+    const reponse = await fetch(SUPABASE_URL + "/functions/v1/" + FONCTION_NOTIFS, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1103,7 +1103,7 @@ async function testerNotifs() {
       return
     }
   } catch (erreur) {
-    alert("Impossible de joindre la fonction resume-matin. Vérifie son nom dans Supabase et que « Verify JWT » est désactivé.")
+    alert("Impossible de joindre la fonction de notifications. Vérifie son adresse dans Supabase et que « Verify JWT » est désactivé.")
     return
   }
   toast("Notification envoyée, regarde ton téléphone")
