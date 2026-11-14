@@ -885,3 +885,20 @@ nav button.actif .icone { filter: none; opacity: 1; transform: scale(1.08); }
 .mini-stats span { font-size: 12px; color: var(--gris); }
 
 #btn-deconnexion { padding: 14px; }
+
+.grand-avatar-boite { position: relative; display: block; cursor: pointer; }
+.grand-avatar, .avatar-profil { background-size: cover; background-position: center; }
+.badge-photo {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--carte);
+  box-shadow: var(--ombre-forte);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}

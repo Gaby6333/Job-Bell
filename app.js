@@ -8,6 +8,8 @@ let filtreBrs = "a_venir"
 let ficheId = null
 let photo = null
 let modeInscription = false
+let maPhoto = null
+let photoProfil = null
 let seulementMoi = lireMemoire("seulementMoi") === "1"
 
 const modeEssai = !SUPABASE_URL || !SUPABASE_KEY
@@ -262,6 +264,7 @@ $("btn-deconnexion").onclick = async function () {
   if (!confirm("Te déconnecter?")) return
   await db.auth.signOut()
   user = null
+  maPhoto = null
   clients = []
   brs = []
   montrer("connexion")
@@ -296,8 +299,18 @@ async function charger(table, colonnes) {
   return reponse.data
 }
 
+async function chargerPhotoProfil() {
+  if (modeEssai) {
+    maPhoto = lireMemoire("photoProfil") || ""
+    return
+  }
+  const reponse = await db.from("profils").select("photo").eq("user_id", user.id).maybeSingle()
+  maPhoto = (reponse.data && reponse.data.photo) || ""
+}
+
 async function rafraichir() {
   afficherErreur("")
+  if (maPhoto === null) await chargerPhotoProfil()
   const listeClients = await charger("clients", COLONNES_CLIENTS)
   if (listeClients) clients = listeClients
   const listeBrs = await charger("brs", COLONNES_BRS)
@@ -1099,18 +1112,22 @@ async function testerNotifs() {
 
 // ---------- Profil ----------
 
+function dessinerAvatar(element, photo, emoji, couleur, nom) {
+  element.textContent = photo ? "" : emoji || initiales(nom)
+  element.style.backgroundColor = couleur
+  element.style.backgroundImage = photo ? "url(" + photo + ")" : "none"
+}
+
 function majAvatarProfil() {
   const profil = monProfil()
-  const bouton = $("btn-profil")
-  bouton.textContent = profil.emoji || initiales(nomUser())
-  bouton.style.background = profil.couleur || "rgba(255, 255, 255, 0.2)"
+  dessinerAvatar($("btn-profil"), maPhoto, profil.emoji, profil.couleur || "rgba(255, 255, 255, 0.2)", nomUser())
 }
 
 function apercuProfil() {
   const form = $("form-profil")
   const nom = form.elements.nom.value.trim() || "?"
-  $("apercu-profil").textContent = form.elements.emoji.value || initiales(nom)
-  $("apercu-profil").style.background = form.elements.couleur.value || "var(--bleu)"
+  dessinerAvatar($("apercu-profil"), photoProfil, form.elements.emoji.value, form.elements.couleur.value || "#00549a", nom)
+  $("retirer-photo-profil").hidden = !photoProfil
   $("nom-apercu").textContent = nom
   appliquerTheme(form.elements.theme.value)
 }
@@ -1128,6 +1145,7 @@ function ouvrirProfil() {
   form.elements.emoji.value = profil.emoji || ""
   form.elements.couleur.value = profil.couleur || "#00549a"
   form.elements.theme.value = lireMemoire("theme") || ""
+  photoProfil = maPhoto
   form.querySelector(".message").textContent = ""
   $("courriel-profil").textContent = modeEssai ? "Mode essai" : user.email
 
@@ -1148,6 +1166,37 @@ function ouvrirProfil() {
 
 $("form-profil").elements.nom.oninput = apercuProfil
 
+$("input-photo-profil").onchange = async function (e) {
+  const fichier = e.target.files[0]
+  if (!fichier) return
+  photoProfil = await photoCarree(fichier, 256)
+  apercuProfil()
+  e.target.value = ""
+}
+
+$("retirer-photo-profil").onclick = function () {
+  photoProfil = null
+  apercuProfil()
+}
+
+function photoCarree(fichier, taille) {
+  return new Promise(function (resolve) {
+    const img = new Image()
+    img.onload = function () {
+      const cote = Math.min(img.width, img.height)
+      const x = (img.width - cote) / 2
+      const y = (img.height - cote) / 2
+      const canvas = document.createElement("canvas")
+      canvas.width = taille
+      canvas.height = taille
+      canvas.getContext("2d").drawImage(img, x, y, cote, cote, 0, 0, taille, taille)
+      URL.revokeObjectURL(img.src)
+      resolve(canvas.toDataURL("image/jpeg", 0.8))
+    }
+    img.src = URL.createObjectURL(fichier)
+  })
+}
+
 $("btn-tester-profil").onclick = testerNotifs
 
 $("form-profil").onsubmit = async function (e) {
@@ -1162,7 +1211,15 @@ $("form-profil").onsubmit = async function (e) {
 
   if (modeEssai) {
     ecrireMemoire("profil", JSON.stringify(infos))
+    ecrireMemoire("photoProfil", photoProfil || "")
   } else {
+    if (photoProfil !== maPhoto) {
+      const envoi = await db.from("profils").upsert({ user_id: user.id, photo: photoProfil })
+      if (envoi.error) {
+        form.querySelector(".message").textContent = "La photo n'a pas pu être enregistrée : il faut exécuter le texte SQL des profils dans Supabase."
+        return
+      }
+    }
     const ancienNom = nomUser()
     const reponse = await db.auth.updateUser({ data: infos })
     if (reponse.error) {
@@ -1176,6 +1233,7 @@ $("form-profil").onsubmit = async function (e) {
     }
   }
 
+  maPhoto = photoProfil || ""
   toast("Profil enregistré ✓")
   montrer(ecranActuel)
   await rafraichir()

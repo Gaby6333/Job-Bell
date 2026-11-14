@@ -88,3 +88,17 @@ $$);
 -- Téléphone et prix proposés (si la table clients existait déjà)
 alter table clients add column if not exists appareil text;
 alter table clients add column if not exists prix text;
+
+-- ---------- Photo de profil ----------
+
+create table if not exists profils (
+  user_id uuid primary key default auth.uid() references auth.users on delete cascade,
+  photo text
+);
+alter table profils enable row level security;
+drop policy if exists "voir" on profils;
+drop policy if exists "modifier le mien" on profils;
+create policy "voir" on profils for select to authenticated using (true);
+create policy "modifier le mien" on profils for all to authenticated
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+grant select, insert, update, delete on profils to authenticated;

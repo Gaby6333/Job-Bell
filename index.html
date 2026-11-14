@@ -12,7 +12,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Équipe">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 
@@ -337,7 +337,12 @@
       </div>
 
       <div class="profil-haut">
-        <div id="apercu-profil" class="grand-avatar"></div>
+        <label class="grand-avatar-boite">
+          <div id="apercu-profil" class="grand-avatar"></div>
+          <span class="badge-photo">📷</span>
+          <input id="input-photo-profil" type="file" accept="image/*" hidden>
+        </label>
+        <button type="button" id="retirer-photo-profil" class="lien danger" hidden>Retirer la photo</button>
         <p id="nom-apercu" class="nom-apercu"></p>
         <p id="courriel-profil" class="petit"></p>
       </div>
@@ -442,7 +447,7 @@
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-  <script src="config.js?v=11"></script>
-  <script src="app.js?v=11"></script>
+  <script src="config.js?v=12"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>
